@@ -1,9 +1,15 @@
 <html>
 <head>
     <title>Timeline</title>
+    <style>
+        div {
+          transition: top 0.5s, height 0.5s, left 0.5s, width 0.5s;
+          -webkit-transition: top 0.5s, height 0.5s, left 0.5s, width 0.5s;
+        }
+    </style>
 </head>
-<body>
-    <div id="timeline"></div>
+<body style="border:0;padding:0;margin:0">
+    <div id="timeline" style="overflow:hidden;position:relative"></div>
     <script src="utils.js"></script>
     <script>
         load(['time', 'timeline', 'main']);

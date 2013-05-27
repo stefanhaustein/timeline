@@ -1,13 +1,10 @@
 var timeline = module.exports = exports = {};
-
-console.log(timeline);
-
 var time = require("time");
 
-console.log(time);
-
-
-timeline.foo = "bar";
+/** 
+ * @type {number}
+ */
+timeline.nextId = 0;
 
 /**
  * @constructor
@@ -27,6 +24,9 @@ timeline.Event = function(timespan, description) {
     /** @type {array.<timeline.Event>} */
     this.children = [];
  
+    /** @type {number} */
+    this.id = "evt" + (timeline.nextId++);
+  
     time.parseInterval(timespan, this);
 };
     
