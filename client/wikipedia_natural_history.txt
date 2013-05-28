@@ -1,0 +1,294 @@
+{{main|History of the Earth|Geological history of Earth}}
+{{see also|Geologic time scale|Timeline of evolution}}
+
+This '''timeline of natural history''' summarizes significant [[cosmological]], [[geological]] and [[biological]] events from the [[formation of the Universe]] to the rise of modern [[human]]s.
+
+==Formation of the Universe==
+{{main|Timeline of the Big Bang}}
+
+* 13,700 million years ago, or megaanna ([[ma (unit)|Ma]]): estimated age of the [[universe]] according to the [[Big Bang]] theory
+*13,600-13,500 Ma: First stars begin to shine
+* 13,200 Ma: age of the oldest known star in the galaxy, [[HE 1523-0901]].
+* 13,100 Ma: Galaxies form
+* 12,700 Ma: age of the [[quasar]] [[CFHQS 1641+3755]]
+* 9,000 Ma: Earliest [[Population I]], or Sunlike stars.
+
+==The earliest Solar System==
+{{main|Formation and evolution of the Solar System|Nebular hypothesis}}
+In the earliest solar system history, the sun, the [[planetesimal]]s and the [[gas giant|jovian planets]] were formed. The inner solar system aggregated more slowly than the outer, so the terrestrial planets were not yet formed, including [[Earth]] and [[Moon]].
+*c. 4,570 Ma: A [[supernova]] explosion seeds our galactic neighborhood with [[heavy element]]s that will be incorporated into the Earth, and results in a [[shock wave]] in a dense region of the [[Milky Way]] galaxy. The [[Ca-Al-rich inclusions]], which formed 2 million years before the [[chondrules]],<ref>Amelin,Yuri, Alexander N. Krot, Ian D. Hutcheon, & Alexander A. Ulyanov (Sept 2002), "Lead Isotopic Ages of Chondrules and Calcium-Aluminum-Rich Inclusions" (Science, 6 September 2002: Vol. 297. no. 5587, pp. 1678 - 1683)</ref> are a key signature of a [[supernova]] explosion. 
+*4,567±3 Ma: Rapid collapse of [[hydrogen]] [[molecular cloud]], forming a third-generation [[Population I star]], the [[Sun]], in a region of the [[Galactic Habitable Zone]] (GHZ), about 25,000 light years from the center of the [[Milky Way Galaxy]].<ref>According to [http://www.psrd.hawaii.edu/Sept02/isotopicAges.html isotopicAges], the Ca-Al-I's (= [[Ca-Al-rich inclusion]]s) here formed in a [[proplyd]] (= protoplanetary disk]).</ref>
+*4,566±2 Ma: A [[protoplanetary disc]] (from which Earth eventually forms) emerges around the young [[Sun]], which is in its [[T Tauri star|T Tauri]] stage.
+*4,560–4550 Ma: Proto-Earth forms at the outer (cooler) edge of the [[habitable zone]] of the [[Solar System]]. At this stage the [[solar constant]] of the sun was only about 73% of its current value, but liquid water may have existed on the surface of the Proto-earth, probably due to the [[greenhouse effect|greenhouse warming]] of high levels of [[methane]] and [[carbon dioxide]] present in the atmosphere.
+
+==Hadean Eon==
+{{main|Hadean}}
+*4,533 Ma: Hadean Eon, [[Precambrian]] Supereon and [[Cryptic era]] start as the [[Earth]]–[[Moon]] system forms, possibly as a result of a glancing collision between proto–Earth and the hypothetical [[protoplanet]] [[Theia (planet)|Theia]]. (The Earth was considerably smaller than now, before this impact.) This impact vaporized a large amount of the crust, and sent material into orbit around Earth, which lingered as rings for a few million years, until these rings condensed into the Moon. The Moon geology [[pre-Nectarian]] period starts. Earth was covered by a [[magma]]tic ocean {{convert|200|km|mi}} deep resulting from the impact energy from this and other [[planetesimal]]s during the [[early bombardment phase]], and energy released by the [[planetary core]] forming. Outgassing from crustal rocks gives Earth a [[redox|reducing]] atmosphere of [[methane]], [[nitrogen]], [[hydrogen]], [[ammonia]], and [[water vapour]], with lesser amounts of [[hydrogen sulfide]], [[carbon monoxide]], then [[carbon dioxide]]. With further full outgassing over 1000–1500 K, nitrogen and ammonia become lesser constituents, and comparable amounts of methane, carbon monoxide, carbon dioxide, water vapour, and hydrogen are released. 
+*4,450 Ma: 100 million years after the Moon formed, the [[Geology of the Moon|first lunar crust]], formed of lunar [[anorthosite]], differentiates from lower [[magma]]s. The earliest Earth crust probably forms similarly out of similar material. On Earth the [[pluvial]] period starts, in which the Earth's crust cools enough to let oceans form.
+*4,404 Ma: First known [[mineral]], found at [[Jack Hills]] in [[Western Australia]]. [[detritus|Detrital]] [[zircon]]s show presence of a solid [[crust (geology)|crust]] and [[liquid]] [[water]]. Latest possible date for a [[secondary atmosphere]] to form, produced by the Earth's crust [[outgassing]], reinforced by water and possibly [[organic molecule]]s delivered by [[comet]] impacts and [[carbonaceous chondrite]]s (including type [[carbonaceous chondrite#CI group|CI]] shown to be high in a number of [[amino acids]] and [[polycyclic aromatic hydrocarbon]]s (PAH)).
+*4,150 Ma: Unofficial [[Basin Groups]] Era starts.
+*4,100 Ma: [[Acasta Gneiss]] of [[Northwest Territories, Canada]], first known [[oldest rock]], or aggregate of minerals.
+==Archaean Eon==
+{{main|Archean}}
+===Eoarchaean Era===
+
+*4,000 Ma: Archean Eon and [[Eoarchean]] Era start.
+*3920–3850 Ma: [[Late heavy bombardment]] of the Moon (and probably of the Earth as well) by [[bolide]]s and [[asteroid]]s, produced possibly by the [[planetary migration]] of [[Neptune]] into the [[Kuiper belt]] as a result of [[orbital resonance]]s between [[Jupiter]] and [[Saturn]].<ref>Taylor, G. Jeffrey (2006), "Wandering Gas Giants and Lunar Bombardment: Outward migration of Saturn might have triggered a dramatic increase in the bombardment rate on the Moon 3.9 billion years ago, an idea testable with lunar samples" [http://www.psrd.hawaii.edu/Aug06/cataclysmDynamics.html]</ref> 
+*3,850 Ma: Greenland [[apatite]] shows evidence of <sup>12</sup>C enrichment, characteristic of the presence of photosynthetic life.<ref>Mojzis, S, et al. (1996), Evidence for Life on Earth before 3800 million years ago", (Nature, 384)</ref>
+*3,850 Ma: First evidence of life: [[Akilia|Akilia Island]] [[graphite]] off Western [[Greenland]] contains evidence of [[kerogen]], of a type consistent with [[photosynthesis]].
+*3,800 Ma: Oldest [[banded iron formation]]s found.
+
+===Paleoarchaean Era===
+*3,600 Ma: [[Paleoarchean]] Era starts. Possible assembly of the [[Vaalbara]] supercontinent
+*3,500 Ma: Fossils resembling cyanobacteria, found at [[Warrawoona, Australia|Warrawoona]], [[Western Australia]].
+*3,460 Ma: Fossils of [[bacteria]] in [[chert]].
+*3,300 Ma: Onset of compressional tectonics<ref name=Eriksson2004>{{citation|last1=Eriksson|first1=P.G.|last2=Catuneanu|first2=Octavian|last3=Nelson|first3=D.R.|last4=Mueller|first4=W.U.|last5=Altermann|first5=Wladyslaw|contribution=Towards a Synthesis (Chapter 5)|year=2004|title=The Precambrian Earth: Tempos and Events|editor1-last=Eriksson|editor1-first=P.G.|editor2-last=Altermann|editor2-first=Wladyslaw|editor3-last=Nelson|editor3-first=D.R.|editor4-last=Mueller|editor-first4=W.U.|editor-last5=Catuneanu|editor-first5=Octavian|volume=Developments in Precambrian Geology 12|pages=739–769|place=Amsterdam, The Netherlands|publisher=Elsevier|isbn=978-0-444-51506-3}}</ref>
+
+===Mesoarchaean Era===
+*3,200 Ma: [[Mesoarchean]] Era starts.  
+*3,200–2600 Ma: Assembly of the [[Ur (continent)|Ur supercontinent]] to cover between 12–16% of the current [[continental crust]].
+*2,900 Ma: Assembly of the [[Kenorland]] supercontinent, based upon the core of the [[Baltic shield]], formed at 3100 Ma.
+
+===Neoarchaean Era===
+*2,800 Ma: [[Neoarchean]] Era starts. Breakup of the [[Vaalbara]] supercontinent
+*2,736 Ma: Formation of the [[Temagami greenstone belt]] in [[Temagami]], [[Ontario]], [[Canada]]
+*2,705 Ma: Major [[komatiite]] eruption, possibly global<ref name=Eriksson2004/>
+*2,700 Ma: Biomarkers of [[cyanobacteria]] discovered, together with [[steranes]] ([[sterol]]s of [[cholesterol]]), associated with films of eukaryotes, in shales located beneath banded iron formation hematite beds, in Hamersley Range, Western Australia<ref>Brocks et al. (1999), "Archaean molecular fossils and the early rise of eukaryotes", (Science 285)</ref> Skewed sulfur isotope ratios found in pyrites shows a small rise in oxygen concentration in the atmosphere<ref>Canfield, D (1999), "A Breath of Fresh Air" (Nature 400)</ref>
+*2,600 Ma: Oldest known giant carbonate platform<ref name=Eriksson2004/>
+
+==Proterozoic Eon==
+{{Main|Proterozoic}}
+===Paleoproterozoic Era===
+{{main|Paleoproterozoic}}
+====Siderian Period====
+*2,500 Ma: Proterozoic Eon, Paleoproterozoic Era, and [[Siderian]] Period start. [[Banded iron formation]]s form during this period. Earth's atmosphere starts to [[oxygen catastrophe|become oxygenic]]. Assembly of [[Arctica]] out of the Canadian [[Laurentian Shield]] and [[Siberia (continent)|Siberian]] [[craton]].
+*2,400 Ma: [[Huronian]] [[glaciation]] starts, probably from oxidation of earlier methane greenhouse gas produced by burial of organic sediments of photosynthesizers. First [[cyanobacteria]].
+====Rhyacian Period====
+*2,300 Ma: [[Rhyacian]] period starts.
+*2,200–1800 Ma: [[Continental Red Beds]] found, produced by iron in weathered sandstone being exposed to oxygen.
+*2,200 Ma: Iron content of ancient fossil soils shows an oxygen built up to 5–18% of current levels<ref>Rye, E. and Holland, H. (1998), "Paleosols and the evolution of atmospheric oxygen", (Amer. Journ. of Science, 289)</ref>
+*2,100 Ma: [[Huronian]] [[glaciation]] ends. Earliest known [[eukaryote]] fossils found. Earliest multicellular organisms ([[Francevillian Group Fossil]])
+====Orosirian Period====
+*2,050 Ma: [[Orosirian]] Period starts. Significant [[orogeny]] in most continents.
+*2,023 Ma: [[Vredefort]] impact structure forms.
+*2,000 Ma: The lesser [[supercontinent]] [[Atlantica]] forms. The [[Oklo]] [[natural nuclear reactor]] of [[Gabon]] produced by uranium-precipitant bacteria.<ref>Cowan, G (1976), A natural fission reactor ([[Scientific American]], 235)</ref> First [[acritarch]]s.
+*1,850 Ma: [[Sudbury Basin|Sudbury impact structure]]. [[Penokean orogeny]]. First [[eukaryote]]s.
+====Statherian Period====
+*1,800 Ma: [[Statherian]] Period starts. [[Supercontinent]] [[Columbia (supercontinent)|Columbia]] forms, one of whose fragments being [[Nena (supercontinent)|Nena]]. Oldest [[erg (landform)|erg]]s develop on several cratons<ref name=Eriksson2004/>
+
+===Mesoproterozoic Era===
+{{main|Mesoproterozoic}}
+====Calymmian Period====
+*1,600 Ma: Mesoproterozoic Era and [[Calymmian]] Period start. [[Platform cover]]s expand. 
+*1,500 Ma: Supercontinent [[Columbia (supercontinent)|Columbia]] breaks up. First structurally complex [[eukaryote]]s.
+
+====Ectasian Period====
+*1,400 Ma: [[Ectasian]] Period starts. [[Platform cover]]s expand. [[Stromatolite]] diversity increases.
+*1,300 Ma: [[Grenville orogeny]] starts.
+====Stenian Period ====
+*1,200 Ma: [[Stenian]] Period starts. [[Red alga]] ''[[Bangiomorpha]] pubescens'', first known [[sex]]ually reproducing [[organism]]. Supercontinent [[Rodinia]] comes together.
+*1,100 Ma: First [[dinoflagellate]].
+
+===Neoproterozoic Era===
+{{Main|Neoproterozoic}}
+====Tonian Period====
+*1,000 Ma: Neoproterozoic Era and [[Tonian]] Period start. [[Grenville orogeny]] ends. First radiation of [[acritarch]]s. [[Rodinia]] starts to break up. First [[vaucherian algae]].
+
+====Cryogenian Period====
+*850 Ma: [[Cryogenian]] Period starts, during which Earth freezes over ([[Snowball Earth]] or [[Slushball Earth]]) at least 3 times.
+*750 Ma: [[Sturtian]] [[glaciation]] starts. [[Rodinia]] splits. Beginning of a possible [[Snowball Earth]] ice age. First [[protozoa]].
+*700 Ma: [[Worm]] impressions in [[China]].
+*685 Ma: [[Cryogenian|Varanger]] glaciation begins.
+*635 Ma: [[Cryogenian|Varanger]] glaciation ends.
+====Ediacaran Period====
+*635 Ma: [[Ediacaran]] period begins.
+*600 Ma: [[Pan-African orogeny]]. [[Supercontinent]] [[Pannotia]] forms.
+*575 Ma: First [[Vendian biota|Ediacaran-type fossils]].
+*560 Ma: [[Trace fossil]]s, e.g., [[worm]] [[burrow]]s, and small [[symmetry (biology)#Bilateral symmetry|bilaterally symmetrical]] animals.  Earliest [[arthropod]]s. Earliest [[fungi]].
+*555 Ma: The first possible mollusk [[Kimberella]] appears.
+*550 Ma: First possible comb-jellies, sponges, corals, and anemones.
+*544 Ma: The [[small shelly fauna]] first appears.
+
+==Phanerozoic Eon==
+{{main|Phanerozoic}}
+
+===Paleozoic Era===
+{{Main|Paleozoic}}
+====Cambrian Period====
+* 542 Ma: beginning of the [[Cambrian]] Period, the [[Paleozoic Era]] and the [[Phanerozoic]] (current) Eon. End of the Ediacaran Period, the [[Proterozoic]] Eon and the [[Precambrian]] Supereon. Time since the [[Cambrian explosion]] the emergence of most forms of complex life, including [[vertebrate]]s ([[fish]]), [[arthropod]]s, [[echinoderm]]s and [[molluscs]]. [[Pannotia]] breaks up into several smaller continents: [[Laurentia]], [[Baltica]] and [[Gondwana]].
+* 540 Ma: Supercontinent of [[Pannotia]] breaks up. 
+* 530 Ma: Possible early land animals.
+* 525 Ma: First [[graptolite]]s.
+* 510 Ma: First [[cephalopod]]s and [[chiton]]s.
+* 505 Ma: Fossilization of the [[Burgess Shale]].
+
+====Ordovician Period====
+* 500 Ma: Beginning of the [[Ordovician]] and the  end of the [[Cambrian]] Period.
+* 485 Ma: First jawless fishes.
+* 450 Ma: [[Plants]] and [[arthropod]]s colonize the land. [[Shark]]s evolve.
+* 440 Ma: First agnathan fish.
+====Silurian Period==== 
+* 435 Ma: Beginning of the [[Silurian]] and the end of the [[Ordovician]] Period.
+* 420 Ma: First creature took a [[lung|breath of air]]. First ray-finned fish and land scorpions.
+* 410 Ma: First toothed fish and [[nautiloid]]s.
+====Devonian Period====
+* 400 Ma: Beginning of the [[Devonian]] and end of the [[Silurian]] Period. First [[insect]]s.
+* 395 Ma: First of many modern groups, including [[tetrapod]]s.
+* 360 Ma: First [[crab]]s and [[fern]]s.
+* 350 Ma: First large sharks, [[ratfish]] and [[hagfish]].
+====Carboniferous Period====
+* 340 Ma: Beginning of the [[Carboniferous]] and the end of [[Devonian Period]]. [[Amphibian]]s diversify.
+* 330 Ma: First [[amniote]]s evolve.
+* 320 Ma: First [[synapsid]]s evolve.
+* 315 Ma: The evolution of the first [[reptiles]].
+* 305 Ma: First [[diapsid]]s evolve.
+====Permian Period====
+* 280 Ma: End of [[Carboniferous]] and beginning of Permian Period. By this time, all continents have fused into the [[supercontinent]] of [[Pangaea]]. [[Beetle]]s evolve. [[Seed plant]]s and [[conifer]]s diversify along with [[temnospondyl]]s and [[pelycosaur]]s.
+* 275 Ma: First [[therapsid]]s evolve.
+* 251.4 Ma: [[Permian mass extinction]]. End of [[Permian]] Period and of the [[Palaeozoic]] Era. Beginning of [[Triassic]] Period, the [[Mesozoic era]] and of the age of the dinosaurs.
+
+===Mesozoic Era===
+{{Main|Mesozoic}}
+====Triassic Period====
+* 251.4 Ma: [[Mesozoic era]] and [[Triassic Period]] begin. [[Mesozoic Marine Revolution]] begins.
+* 245 Ma: First [[ichthyosaur]]s.
+* 240 Ma: [[Cynodont]]s and [[rhynchosaur]]s diversify.
+* 225 Ma: First [[dinosaur]]s and [[teleosti]] evolve.
+* 220 Ma: First [[crocodilians]] and [[flies]].
+* 215 Ma: First [[turtles]]. Long-necked [[sauropod]] dinosaurs and ''[[Coelophysis]]'', one of the earliest [[theropod]] dinosaurs, evolve. First [[mammal]]s.
+====Jurassic Period====
+* 195 Ma: end of Triassic and beginning of [[Jurassic]] Period. The largest dinosaurs, such as ''[[Diplodocus]]'' and ''[[Brachiosaurus]]'' evolve during this time, as do the [[carnosaurs]]; large, bipedal predatory dinosaurs such as ''[[Allosaurus]]''. First specialized [[pterosaur]]s and [[sauropod]]s. [[Ornithischian]]s diversify.
+* 190 Ma: [[Pliosaur]]s evolve, along with many groups of primitive sea invertebrates.
+* 180 Ma: [[Pangaea]] splits into two major continents: [[Laurasia]] in the north and [[Gondwana]] in the south.
+* 176 Ma: First [[stegosaur]]s.
+* 170 Ma: First [[salamander]]s and [[newt]]s evolve. [[Cynodont]]s go extinct.
+* 165 Ma: First [[stingray]]s.
+* 161 Ma: First [[ceratopsian]]s.
+* 155 Ma: First [[bird]]s and [[triconodont]]s. [[Stegosaur]]s and [[theropod]]s diversify.
+====Cretaceous Period====
+* 135 Ma: End of [[Jurassic]] and beginning of [[Cretaceous]] Period.
+* 130 Ma: [[Laurasia]] and [[Gondwana]] begin to split apart as the [[Atlantic Ocean]] forms. First [[flowering plant]]s.
+* 115 Ma: First [[monotreme]]s.
+* 110 Ma: First [[hesperornithes]].
+* 106 Ma: [[Spinosaurus]] evolves.
+* 100 Ma: First [[bee]]s.
+* 90 Ma: the [[Indian subcontinent]] splits from [[Gondwana]], becoming an island [[continent]]. [[Ichthyosaur]]s go extinct. [[Snake]]s and [[tick]]s evolve.
+* 80 Ma: Australia splits from [[Antarctica]]. First [[ant]]s.
+* 70 Ma: [[Multituberculate]]s diversify.
+* 68 Ma: [[Tyrannosaurus Rex]] evolves. 
+* 65 Ma: [[Cretaceous–Paleogene extinction event]] at the end of the [[Cretaceous]] Period marks the end of the [[Mesozoic]] era and the age of the [[dinosaurs]]; start of the [[Paleogene]] Period and the current [[Cenozoic]] era.
+
+===Cenozoic Era===
+{{Main|Cenozoic}}
+====Paleogene Period====
+* 63 Ma: First [[creodont]]s.
+* 60 Ma: Evolution of the first [[primates]] and [[miacid]]s. Flightless birds diversify.
+* 56 Ma: [[Gastornis]] evolves.
+* 55 Ma: the island of the [[Indian subcontinent]] collides with Asia, thrusting up the [[Himalayas]] and the [[Tibetan Plateau]]. Many modern bird groups appear. First [[whale]] ancestors. First [[rodent]]s, [[lagomorph]]s, [[armadillo]]s, [[sirenian]]s, [[proboscidean]]s, [[perissodactyl]]s, [[artiodactyl]]s, and [[mako shark]]s. [[Angiosperm]]s diversify.
+* 52 Ma: First [[bat]]s.
+* 50 Ma: Africa collides with [[Eurasia]], closing the [[Tethys Sea]]. Divergence of [[feliform|cat]] and [[caniform|dog]] ancestors. [[Primates]] diversify. [[Brontothere]]s, [[tapir]]s, [[rhino]]s, and [[camel]]s evolve.
+* 49 Ma: [[Whale]]s return to the water.
+* 40 Ma: Age of the [[Catarrhini]] parvorder; first [[Canidae|canines]] evolve. [[Lepidoptera]]n insects become recognizable. [[Gastornis]] goes extinct. [[Basilosaurus]] evolves.
+* 37 Ma: First [[Nimravid]]s.
+* 36 Ma: End of [[Eocene]], start of [[Oligocene]] epoch.
+* 35 Ma: [[Grassland]]s first appear. [[Glyptodont]]s, [[ground sloth]]s, peccaries, dogs, eagles, and hawks evolve.
+* 34 Ma: [[Felidae|Cat]]s evolve.
+* 33 Ma: First [[thylacinid]] marsupials evolve.
+* 30 Ma: [[Brontothere]]s go extinct. Pigs evolve. [[South America]] separates from Antarctica, becoming an island continent. 
+* 28 Ma: [[Paraceratherium]] evolves.
+* 26 Ma: Emergence of the first true [[Proboscidea|elephants]].
+* 25 Ma: First deer.
+====Neogene Period====
+* 24 Ma: [[Neogene]] Period and [[Miocene]] epoch begin
+* 20 Ma: Giraffes and [[giant anteater]]s evolve.
+* 18-12 Ma: estimated age of the ''[[Hominidae]]''/''[[Hylobatidae]]'' (great apes vs. gibbons) split.
+* 15 Ma: First [[mastodon]]s, [[bovid]]s, and kangaroos. Australian megafauna diversify.
+* 10 Ma: Insects diversify. First large horses.
+* 6.5 Ma: First members of the [[Hominini]] tribe.
+* 6 Ma: [[Australopithecine]]s diversify.
+* 5.4-6.3 Ma: Estimated age of the ''[[Homo (genus)|Homo]]/[[Pan (genus)|Pan]]'' (human vs. chimpanzee) split.
+* 5.5 Ma: Appearance of the genus ''[[Ardipithecus]]''
+* 5 Ma: [[Pliocene]] epoch begins. First tree sloths and hippopotami. First large vultures. [[Nimravid]]s go extinct.
+* 4.8 Ma: The [[mammoth]] appears. 
+* 4.5 Ma: appearance of the genus ''[[Australopithecus]]''
+* 3 Ma: [[Isthmus of Panama]] joins North and South America. [[Great American Interchange]].
+* 2.7 Ma: [[Paranthropus]] evolve. 
+* 2.6 Ma: current [[ice age]] begins
+====Quaternary Period====
+* 2.5 Ma: start of the [[Pleistocene]] epoch, the [[Stone Age]] and the current [[Quaternary]] Period; emergence of the [[Homo (genus)|genus ''Homo'']]. [[Smilodon]], the best known of the [[sabre-toothed cat]]s, appears.
+* 1.7 Ma: [[Australopithecine]]s go extinct.
+* 1.5 Ma: earliest possible evidence of the controlled use of [[fire]] by ''[[Homo erectus]]''
+* 1.2 Ma: [[Homo antecessor]] evolves. [[Paranthropus]] dies out.
+* 0.79 Ma: earliest demonstrable evidence of the controlled use of [[fire]] by ''[[Homo erectus]]''
+* 0.7 Ma: last reversal of the [[earth's magnetic field]]
+* 0.64 Ma: [[Yellowstone caldera]] erupts
+* 0.6 Ma: [[Homo heidelbergensis]] evolves.
+* 0.5 Ma: [[human migration|colonisation of Eurasia]] by ''[[Homo erectus]]''
+* 0.35 Ma: [[Neanderthal]]s evolve.
+* 0.3 Ma: Approximate age of  [[wolf|''Canis lupus'']]. [[Middle Stone Age]] begins in Africa. [[Gigantopithecus]] evolves.
+* 0.2 Ma: [[Middle Paleolithic]] begins. Appearance of ''[[Homo sapiens]]'' in [[Africa]]
+
+{{for|later events|Timeline of human prehistory}}
+
+==Etymology of period names==
+{|class="wikitable"
+|- 
+![[Period (geology)|Period]]!!Started!![[root (linguistics)|Root]] word!!Meaning!!Reason for name
+|-
+|[[Siderian]]||2500 Ma||[[Greek language|Greek]] ''sidēros''||iron||ref. the [[banded iron formation]]s
+|-
+|[[Rhyacian]]||2300 Ma||Gk. ''rhyax''||[[lava]] flow||much lava flowed
+|-
+|[[Orosirian]]||2050 Ma||Gk. ''oroseira''||mountain range||much [[orogeny]] in this period's latter half
+|-
+|[[Statherian]]||1800 Ma||Gk. ''statheros''||steady||continents became stable [[craton]]s
+|-
+|[[Calymmian]]||1600 Ma||Gk. ''calymma''||cover||[[platform cover]]s developed or expanded
+|-
+|[[Ectasian]]||1400 Ma||Gk. ''ectasis''||stretch||[[platform cover]]s expanded
+|-
+|[[Stenian]]||1200 Ma||Gk. ''stenos''||narrow||much orogeny, which survives as '''narrow''' [[Metamorphic rock|metamorphic]] belts
+|-
+|[[Tonian]]||1000 Ma||Gk. ''tonos''||stretch||The continental crust stretched as [[Rodinia]] broke up
+|-
+|[[Cryogenian]]||850 Ma<s>||Gk. ''[[cryogenic]]os''||cold-making||In this period all the Earth froze over
+|-
+|[[Ediacaran]]||635 Ma||[[Ediacara Hills]]||||place in Australia where the [[Ediacaran biota]] fossils were found
+|-
+|[[Cambrian]]||542 Ma||[[Latin language|Latin]] ''Cambria''||[[Wales]]||ref. to the place in [[Great Britain]] where Cambrian rocks are best exposed
+|-
+|[[Ordovician]]||488 Ma||[[Celtic language|Celtic]] ''[[Ordovices]]''|| || Tribe in north Wales, where the rocks were first identified
+|-
+|[[Silurian]]||444 Ma||Ctc. ''[[Silures]]''|| ||Tribe in south Wales, where the rocks were first identified
+|-
+|[[Devonian]]||416 Ma||[[Devon]]|| ||County in England in which rocks from this period were first identified 
+|-
+|[[Carboniferous]]||359 Ma|| Lt. ''carbo'' ||coal|| Global coal beds were laid in this period
+|-
+|[[Permian]]||299 Ma||[[Perm Krai]] || ||Region in [[Russia]] where rocks from this period were first identified
+|-
+|[[Triassic]]||250 Ma||Lt. ''trias''||triad|| In Germany this period forms three distinct layers
+|-
+|[[Jurassic]]||200 Ma|| [[Jura Mountains]]|| || Mountain range in the [[Alps]] in which rocks from this period were first identified
+|-
+|[[Cretaceous]]||146 Ma||Lt. ''creta''||chalk|| More chalk formed in this period than any other 
+|-
+|[[Paleogene]]||65 Ma||Gk. ''palaiogenos'' ||"ancient born"||
+|-
+|[[Neogene]]||23 Ma||Gk. ''neogenos'' ||"new born"||
+|-
+|[[Quaternary]]||2.6 Ma||Lt. ''quaternarius'' || "fourth" || This was initially deemed the "fourth" period after the now-obsolete "primary", "secondary" and "tertiary" periods. 
+|}
+
+==References==
+{{reflist|1}}
+
+{{Millennia}}
+==See also==
+*[[Timeline of the far future]]
+*[[Detailed logarithmic timeline]] 
+*[[Terasecond and longer]]
+
+[[Category:Prehistory| ]]
+[[Category:Ancient timelines|Prehistory]]
+[[Category:Archaeology timelines|Prehistory]]

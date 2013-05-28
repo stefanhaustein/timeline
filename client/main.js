@@ -1,73 +1,202 @@
 var timeline = require('timeline');
+var time = require('time');
 
 var rootElement = document.getElementById('timeline');
+var wikiFrame = document.getElementById('wiki');
 
-function render(parent, prefix, event, timeOffset, parentY, remainingWidth, remainingHeight, scale) {
-    var y = (event.start - timeOffset) * scale;
-    var height = (event.end - event.start) * scale;
+var LABEL_WIDTH = 150;
+var ROT_LABEL_WIDTH = 30;
+
+
+function hsvToRgb(h, s, v) {
+    var hi = ~~(h/60.0);
+    var f = h/60.0 - hi;
+    v *= 255.0;
+    var p = v*(1 - s);
+    var q = v*(1 - s*f);
+    var t = v*(1 - s*(1 - f));
+    var r,g,b;
+    switch(hi){
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        case 5: r = v; g = p; b = q; break;
+        default:
+            r = v; g = t; b = p;
+    }
+    return "rgb(" + ~~r + "," + ~~g + "," + ~~b + ")";
+}
+
+function render(parentElement, parentY, event, nextStart, big, fraction, remainingWidth, remainingHeight) {
+    var y = (event.start - timeOffset) * timeScale;
+    var height = ((event.start == event.end ? nextStart : event.end) - event.start) * timeScale;
     var top = y - parentY;
+    var count = event.children.length;
 
     var element = document.getElementById(event.id);
     var textTop = y < 0 ? -y : 0; 
 
     var textDiv;
-    var containerDiv; 
-    if (element == null) {
+    var containerDiv = null; 
+    if (!element) {
         element = document.createElement("div");
-        element.setAttribute("id", event.id);
-        containerDiv = document.createElement("div");
+        element.setAttribute('id', event.id);
+        element.className = event.start == event.end ? 'event' : 'span';
         textDiv = document.createElement("div");
-        parent.appendChild(element);
+        textDiv.className = 'text';
+        textDiv.innerHTML = event.description;
+        parentElement.appendChild(element);
         element.appendChild(textDiv);
-        element.appendChild(containerDiv);
+        if (count) {
+            containerDiv = document.createElement("div");
+            element.appendChild(containerDiv);
+        }
     } else {
         textDiv = element.firstChild;
-        containerDiv = textDiv.nextSibling;
-    }
-
-    element.setAttribute("style", 
-        "overflow:hidden;display:block;border: 1px solid black; margin:-1px;position: absolute; top:" + top + 
-        "px; height:"+ height + "px; width:" + remainingWidth + "px;");
-
-    var fullscreenChild = -1;
-    for(var i = 0; i < event.children.length; i++) {
-        var child = event.children[i];
-        var cy0 = (child.start - timeOffset) * scale;
-        var cy1 = (child.end - timeOffset) * scale;
-        if (cy0 <= 0 && cy1 > remainingHeight) {
-            fullscreenChild = i;
-            break;
+        if (count !== 0) {
+            containerDiv = textDiv.nextSibling;
         }
     }
 
-    if (fullscreenChild == -1) {
-        remainingWidth -= 100;
-        textDiv.setAttribute("style", "width:100px;position:relative;top:"+textTop);
-        containerDiv.setAttribute("style",
-           "position:absolute;left:100px;top:0;height:"+height+";width:"+ remainingWidth + "px");
-        textDiv.innerHTML = prefix + event.description;
-        prefix = "";
-    } else {
-        textDiv.setAttribute("style", "display:none");
-        containerDiv.setAttribute("style",
-            "position:absolute;top:0;left:0;height:"+height+";width:"+ remainingWidth + "px");
-        prefix += event.description + ":<br>";
+    element.style.height = height;
+    element.style.top = top;
+    element.style.width = remainingWidth;
+    
+    if (event.start < event.end) {
+        var rgb = hsvToRgb(360-fraction * 360, 0.3, 1);
+         element.style.backgroundColor = rgb;
     }
+        
+    if (count) {
+        var allBig = big;
+        if (allBig) {
+            var anyBig = false;
+            for(var i = 0; i < event.children.length; i++) {
+                var child = event.children[i];
+                var bigChild = (child.end - child.start) * timeScale > remainingHeight / 4;
+                anyBig |= bigChild;
+                if (child.start != child.end && timeToY(child.start) > -remainingHeight/2 && timeToY(child.end) < remainingHeight * 1.5 && 
+                    !bigChild) {
+                     allBig = false;
+                    break;
+                }
+            }
+            allBig &= anyBig;
+        }
+        if (event.description == "natural history") {
+            textDiv.style.display = "none";
+            containerDiv.setAttribute("style",
+                "position:absolute;top:0;left:0;height:"+height+";width:"+ remainingWidth + "px");
+            big = allBig;
+        } else {
+            var lw;
+            if (big) {
+                textDiv.className = "rot";
+                lw = ROT_LABEL_WIDTH;
+                textDiv.style.width = height;
+                textDiv.style.height = lw;
+                textDiv.style.top = textTop + height;
+            } else {
+                textDiv.className = "text";
+                lw = LABEL_WIDTH;
+                textDiv.style.top = textTop;
+                textDiv.style.width = lw;
+                textDiv.style.height = height;
+            }
+            remainingWidth -= lw;
+            textDiv.style.display = "block";
+            containerDiv.setAttribute("style",
+                "position:absolute;left:"+lw+"px;top:0;height:"+height+";width:"+ remainingWidth + "px");
+            big = allBig;
+        } 
+    } 
 
-    if (remainingWidth < 100 || height <= 20) {
-        containerDiv.innerHTML = "";
+    if (remainingWidth < LABEL_WIDTH || height <= 20) {
+        if (containerDiv) {
+            containerDiv.innerHTML = "";
+        }
         return;
     }
     
     for (var i = 0; i < event.children.length; i++) {
-        render(containerDiv, prefix, event.children[i], timeOffset, y, 
-               remainingWidth, remainingHeight, scale);
+        var child = event.children[i];
+        var cf = ((child.start + child.end) / 2 - event.start) / (event.end - event.start);
+        var childNextStart = i < count - 1 ? event.children[i+1].start : event.end;
+        render(containerDiv, y, event.children[i], childNextStart, big, cf, remainingWidth, remainingHeight);
     }
 }
 
-var timeOffset = -13700000000;
-var minScale = window.innerHeight / 13700000000;
+var minOffset = -13700000000;
+var timeOffset = minOffset;
+var minScale = window.innerHeight / -minOffset;
 var timeScale = minScale;
+var timePointer = document.getElementById("timepointer");
+
+rootElement.addEventListener('DOMMouseScroll', onMouseWheel, false);  
+rootElement.addEventListener("mousewheel", onMouseWheel, false);
+rootElement.onclick = function(event) {
+    console.log(event);
+    if (event.target) { 
+        var href = event.target.getAttribute("href");
+        wikiFrame.src = "http://en.m.wikipedia.org/wiki/"+ href.substr(1);   
+    }
+    event.preventDefault();
+};
+
+function timeToY(t) {
+    return (t - timeOffset) * timeScale;
+}
+
+function yToTime(y) {
+    return y / timeScale + timeOffset;
+}
+
+function updateTimePointer(y) {
+    timePointer.style.top = y - timePointer.offsetHeight / 2;
+    timePointer.innerHTML = time.toString(yToTime(y)) + " &rarr;";
+}
+
+window.onresize = function(e) {
+    console.log(e);
+     minScale = window.innerHeight / -minOffset;
+        update(0);
+};
+
+function onMouseWheel(event) {
+    var factor = 1.1;
+    var delta = event.wheelDeltaY;
+    var y = event.clientY;
+    if (!event.shiftKey) {
+        if (delta < 0) {
+            // middle between y and  middle to zoom out
+            y = (y + (rootElement.offsetHeight / 2)) / 2;
+            timeOffset = yToTime(y);
+            timeScale /= factor;
+            timeOffset += yToTime(0) - yToTime(y);
+        } else {
+            // move y beyond to simplify zooming into corners
+            y = y + (y - rootElement.offsetHeight / 2) * 0.05;
+            timeOffset = yToTime(y);
+            timeScale *= factor;
+            timeOffset += yToTime(0) - yToTime(y);
+        }
+    } else {
+        if (delta < 0) {
+            timeOffset -= 5 / timeScale;
+        } else {
+            timeOffset += 5 / timeScale;
+        }
+    }
+    event.preventDefault();
+    update(event.clientY);
+}
+
+document.onmousemove = function(event) {
+    updateTimePointer(event.clientY);
+};
+
+
 
 document.onkeydown = function(event) {
     console.log(event);
@@ -87,22 +216,36 @@ document.onkeydown = function(event) {
         return;
     }
     window.console.log("new scale: "+ timeScale);
-    update();
-}
+    update(event.clientY);
+};
 
-function update() {
-    rootElement.style.width = window.innerWidth + "px";
-    rootElement.style.height = window.innerHeight + "px";
+function update(y) {
+    if (timeScale < minScale) {
+        timeScale = minScale;
+    }
+    if (timeOffset < minOffset) {
+        timeOffset = minOffset;
+    }
+    var tbottom = yToTime(rootElement.offsetHeight);
+    if (tbottom > 0) {
+        timeOffset -= tbottom;
+    }
+
     
-    render(rootElement, "", naturalHistory, timeOffset, 0, 
-           window.innerWidth, window.innerHeight, timeScale);
+    var w = rootElement.offsetWidth;
+    var h = window.innerHeight;
+    rootElement.style.height = h + "px";
+    
+    updateTimePointer(y);
+    
+    render(rootElement, 0, naturalHistory, 0, true, 0.5, w, h);
 }
     
 var naturalHistory = new timeline.Event("13,700 Ma - 0", "natural history");
 var req = new XMLHttpRequest();
 req.onload = function() {
     naturalHistory.parse(this.responseText);
-    update();
+    update(0);
 };
-req.open('get', 'testdata.txt');
+req.open('get', 'wikipedia_natural_history.txt');
 req.send();
