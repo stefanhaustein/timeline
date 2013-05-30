@@ -1,12 +1,30 @@
 var timeline = require('timeline');
 var time = require('time');
+var wiki = require('wiki');
 
-var rootElement = document.getElementById('timeline');
-var wikiFrame = document.getElementById('wiki');
+var timelineElement = document.getElementById('timeline');
+var wikiFrame = document.getElementById('wikiFrame');
 
 var LABEL_WIDTH = 150;
 var ROT_LABEL_WIDTH = 30;
 
+var minOffset = -13700000000;
+var timeOffset = minOffset;
+var minScale = timelineElement.offsetHeight / -minOffset;
+var timeScale = minScale;
+var timePointer = document.getElementById("timepointer");
+
+function timeToY(t) {
+    return (t - timeOffset) * timeScale;
+}
+
+function yToTime(y) {
+    return y / timeScale + timeOffset;
+}
+
+function toGrayscale(rgb) {
+    return 0.21 * rgb[0] + 0.71 * rgb[1] + 0.07* rgb[2];
+}
 
 function hsvToRgb(h, s, v) {
     var hi = ~~(h/60.0);
@@ -28,7 +46,26 @@ function hsvToRgb(h, s, v) {
     return "rgb(" + ~~r + "," + ~~g + "," + ~~b + ")";
 }
 
-function render(parentElement, parentY, event, nextStart, big, fraction, remainingWidth, remainingHeight) {
+function measureDepth(event) {
+    var h = timelineElement.offsetHeight;
+    var min = 1000;
+    for (var i = 0; i < event.children.length; i++) {
+        var child = event.children[i];
+        var start = timeToY(child.start);
+        var end = timeToY(child.end);
+        if (end < -h/2 || start > 1.5 * h || start == end) continue;
+        if (end - start < h / 3) {
+            return 0;
+        }
+        var d = measureDepth(child) + 1;
+        if (d < min) {
+            min = d;
+        }
+    }
+    return min;
+}
+
+function render(parentElement, parentY, event, nextStart, collapse, fraction, remainingWidth, remainingHeight) {
     var y = (event.start - timeOffset) * timeScale;
     var height = ((event.start == event.end ? nextStart : event.end) - event.start) * timeScale;
     var top = y - parentY;
@@ -43,6 +80,7 @@ function render(parentElement, parentY, event, nextStart, big, fraction, remaini
         element = document.createElement("div");
         element.setAttribute('id', event.id);
         element.className = event.start == event.end ? 'event' : 'span';
+        element['_event_'] = event;
         textDiv = document.createElement("div");
         textDiv.className = 'text';
         textDiv.innerHTML = event.description;
@@ -52,46 +90,33 @@ function render(parentElement, parentY, event, nextStart, big, fraction, remaini
             containerDiv = document.createElement("div");
             element.appendChild(containerDiv);
         }
+        if (event.start < event.end && event.color) {
+            var rgb = event.color;
+            element.style.backgroundColor = 
+                "rgb(" +rgb[0]+ "," + rgb[1] + "," + rgb[2]+")";
+            element.style.color = toGrayscale(rgb) < 48 ? "#ccc" : "#333";
+        } 
     } else {
         textDiv = element.firstChild;
         if (count !== 0) {
             containerDiv = textDiv.nextSibling;
         }
     }
-
-    element.style.height = height;
-    element.style.top = top;
-    element.style.width = remainingWidth;
     
-    if (event.start < event.end) {
-        var rgb = hsvToRgb(360-fraction * 360, 0.3, 1);
-         element.style.backgroundColor = rgb;
-    }
-        
+    // TODO(haustein) Avoid this here
+    
+    element.style.top = top;
+    element.style.height = height;
+    element.style.width = remainingWidth;
+   
     if (count) {
-        var allBig = big;
-        if (allBig) {
-            var anyBig = false;
-            for(var i = 0; i < event.children.length; i++) {
-                var child = event.children[i];
-                var bigChild = (child.end - child.start) * timeScale > remainingHeight / 4;
-                anyBig |= bigChild;
-                if (child.start != child.end && timeToY(child.start) > -remainingHeight/2 && timeToY(child.end) < remainingHeight * 1.5 && 
-                    !bigChild) {
-                     allBig = false;
-                    break;
-                }
-            }
-            allBig &= anyBig;
-        }
-        if (event.description == "natural history") {
+        if (false && event.description == "natural history") {
             textDiv.style.display = "none";
             containerDiv.setAttribute("style",
                 "position:absolute;top:0;left:0;height:"+height+";width:"+ remainingWidth + "px");
-            big = allBig;
         } else {
             var lw;
-            if (big) {
+            if (collapse > 0 || event.description == "natural history") {
                 textDiv.className = "rot";
                 lw = ROT_LABEL_WIDTH;
                 textDiv.style.width = height;
@@ -108,11 +133,14 @@ function render(parentElement, parentY, event, nextStart, big, fraction, remaini
             textDiv.style.display = "block";
             containerDiv.setAttribute("style",
                 "position:absolute;left:"+lw+"px;top:0;height:"+height+";width:"+ remainingWidth + "px");
-            big = allBig;
         } 
     } 
 
-    if (remainingWidth < LABEL_WIDTH || height <= 20) {
+    textDiv.style.display = height >= 20 ? "block": "none";
+
+    if (remainingWidth < LABEL_WIDTH || height < 8 || 
+        y + height < -timelineElement.offsetHeight || 
+        y > 2 * timelineElement.offsetHeight) {
         if (containerDiv) {
             containerDiv.innerHTML = "";
         }
@@ -123,34 +151,67 @@ function render(parentElement, parentY, event, nextStart, big, fraction, remaini
         var child = event.children[i];
         var cf = ((child.start + child.end) / 2 - event.start) / (event.end - event.start);
         var childNextStart = i < count - 1 ? event.children[i+1].start : event.end;
-        render(containerDiv, y, event.children[i], childNextStart, big, cf, remainingWidth, remainingHeight);
+        render(containerDiv, y, event.children[i], childNextStart, collapse - 1, cf, remainingWidth, remainingHeight);
     }
 }
 
-var minOffset = -13700000000;
-var timeOffset = minOffset;
-var minScale = window.innerHeight / -minOffset;
-var timeScale = minScale;
-var timePointer = document.getElementById("timepointer");
 
-rootElement.addEventListener('DOMMouseScroll', onMouseWheel, false);  
-rootElement.addEventListener("mousewheel", onMouseWheel, false);
-rootElement.onclick = function(event) {
-    console.log(event);
-    if (event.target) { 
-        var href = event.target.getAttribute("href");
-        wikiFrame.src = "http://en.m.wikipedia.org/wiki/"+ href.substr(1);   
+function update(y, smooth) {
+    timelineElement.className = smooth ? "smooth" : "";
+
+    if (timeScale < minScale) {
+        timeScale = minScale;
     }
-    event.preventDefault();
+    if (timeOffset < minOffset) {
+        timeOffset = minOffset;
+    }
+    var tbottom = yToTime(timelineElement.offsetHeight);
+    if (tbottom > 0) {
+        timeOffset -= tbottom;
+    }
+
+    var w = timelineElement.offsetWidth;
+    var h = timelineElement.offsetHeight;
+    timelineElement.style.height = h + "px";
+    
+    updateTimePointer(y);
+    
+    render(timelineElement, 0, naturalHistory, 0, measureDepth(naturalHistory), 0.5, w, h);
+}
+
+
+// Event handlers 
+
+
+timelineElement.addEventListener('DOMMouseScroll', onMouseWheel, false);  
+timelineElement.addEventListener("mousewheel", onMouseWheel, false);
+
+timelineElement.onclick = function(event) {
+    var element = event.target;
+    if (element) { 
+        var href = element.getAttribute("href");
+        //wiki.fetchHtml(href.substr(1), function(s) {
+        //    console.log(s);
+        //    wikiFrame.innerHTML = s;
+        //});
+        if (href) {
+            wikiFrame.src = "http://en.m.wikipedia.org/wiki/"+ href.substr(1);  
+            event.preventDefault();
+        } else {
+            var e = null;
+            do {
+                e = element['_event_'];
+                element = element.parentElement;
+            } while(e == null && element != null);
+            if (e) {
+                timeOffset = e.start;
+                timeScale = timelineElement.offsetHeight / (e.end - e.start);
+                update(event.clientY, true);
+                event.preventDefault();
+            }
+        }
+    }
 };
-
-function timeToY(t) {
-    return (t - timeOffset) * timeScale;
-}
-
-function yToTime(y) {
-    return y / timeScale + timeOffset;
-}
 
 function updateTimePointer(y) {
     timePointer.style.top = y - timePointer.offsetHeight / 2;
@@ -159,7 +220,8 @@ function updateTimePointer(y) {
 
 window.onresize = function(e) {
     console.log(e);
-     minScale = window.innerHeight / -minOffset;
+    timelineElement.style.height = window.innerHeight;
+    minScale = window.innerHeight / -minOffset;
         update(0);
 };
 
@@ -167,29 +229,34 @@ function onMouseWheel(event) {
     var factor = 1.1;
     var delta = event.wheelDeltaY;
     var y = event.clientY;
-    if (!event.shiftKey) {
+    if (event.shiftKey) {
         if (delta < 0) {
             // middle between y and  middle to zoom out
-            y = (y + (rootElement.offsetHeight / 2)) / 2;
+            y = (y + (timelineElement.offsetHeight / 2)) / 2;
             timeOffset = yToTime(y);
             timeScale /= factor;
             timeOffset += yToTime(0) - yToTime(y);
         } else {
             // move y beyond to simplify zooming into corners
-            y = y + (y - rootElement.offsetHeight / 2) * 0.05;
+            y = y + (y - timelineElement.offsetHeight / 2) * 0.2;
             timeOffset = yToTime(y);
             timeScale *= factor;
             timeOffset += yToTime(0) - yToTime(y);
         }
+        event.preventDefault();
+        update(event.clientY);
     } else {
+        var oldOffset = timeOffset;
         if (delta < 0) {
-            timeOffset -= 5 / timeScale;
+            timeOffset += 10 / timeScale;
         } else {
-            timeOffset += 5 / timeScale;
+            timeOffset -= 10 / timeScale;
+        }
+        update(event.clientY);
+        if (timeOffset !== oldOffset) {
+            event.preventDefault();
         }
     }
-    event.preventDefault();
-    update(event.clientY);
 }
 
 document.onmousemove = function(event) {
@@ -197,51 +264,40 @@ document.onmousemove = function(event) {
 };
 
 
-
 document.onkeydown = function(event) {
     console.log(event);
     var char = event.which == null ? event.keyCode : event.which;
+    var y = timelineElement.offsetHeight / 2;
     if (char === 187) {
+        timeOffset = yToTime(y);
         timeScale *= 3.0/2.0;
+        timeOffset += yToTime(0) - yToTime(y);
     } else if (char === 189) {
+        timeOffset = yToTime(y);
         timeScale *= 2.0/3.0;
-        if (timeScale < minScale/2) {
-            timeScale = minScale/2;
-        }
+        timeOffset += yToTime(0) - yToTime(y);
     } else if (char === 38) {
-        timeOffset -= 5 / timeScale;
+        timeOffset -= 10 / timeScale;
     } else if (char === 40) {
-        timeOffset += 5 / timeScale;
+        timeOffset += 10 / timeScale;
     } else {
         return;
     }
-    window.console.log("new scale: "+ timeScale);
     update(event.clientY);
 };
 
-function update(y) {
-    if (timeScale < minScale) {
-        timeScale = minScale;
-    }
-    if (timeOffset < minOffset) {
-        timeOffset = minOffset;
-    }
-    var tbottom = yToTime(rootElement.offsetHeight);
-    if (tbottom > 0) {
-        timeOffset -= tbottom;
-    }
 
-    
-    var w = rootElement.offsetWidth;
-    var h = window.innerHeight;
-    rootElement.style.height = h + "px";
-    
-    updateTimePointer(y);
-    
-    render(rootElement, 0, naturalHistory, 0, true, 0.5, w, h);
-}
-    
+// startup
+
 var naturalHistory = new timeline.Event("13,700 Ma - 0", "natural history");
+
+wiki.fetchWikiText("Timeline of natural history", function(text) {
+    console.log("Wiki fetch result:");
+    naturalHistory.parse(text);
+    update(0);
+});
+
+/*    
 var req = new XMLHttpRequest();
 req.onload = function() {
     naturalHistory.parse(this.responseText);
@@ -249,3 +305,5 @@ req.onload = function() {
 };
 req.open('get', 'wikipedia_natural_history.txt');
 req.send();
+*/
+

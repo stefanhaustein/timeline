@@ -1,32 +1,25 @@
 var timeline = module.exports = exports = {};
-var time = require("time");
-var string = require("string");
+var time = require('time');
+var string = require('string');
+var colors = require('colors');
+var wiki = require('wiki');
+
+console.log("colors:");
+console.log(colors);
 
 /** 
  * @type {number}
  */
 timeline.nextId = 0;
 
-timeline.parseWiki=function(s) {
-    while(true) {
-        var cut0 = s.indexOf("[[");
-        if (cut0 == -1) break;
-        var cut1 = s.indexOf("]]");
-        if (cut1 == -1) break;
-        var ww = s.substring(cut0 + 2, cut1);
-        var cut2 = ww.indexOf('|');
-        var link, label
-        if (cut2 == -1) {
-            link = label = ww;
-        } else {
-            link = ww.substr(0, cut2);
-            label = ww.substr(cut2+1);
-        }
-        
-        s = s.substr(0, cut0) + '<a href="#' + link + '">' + label + "</a>" + s.substring(cut1 + 2);
-        console.log(s);
+timeline.getColor = function(s) {
+    s = string.trim(s);
+    var cut = s.indexOf(' ');
+    if (cut != -1) {
+        s = s.substring(0, cut);
     }
-    return s;
+    s = s.replace('[[', '').replace(']]', '').toLowerCase();
+    return colors[s];
 };
 
 /**
@@ -42,13 +35,18 @@ timeline.Event = function(timespan, description) {
     this.end = -1e100;
     
     /** @type {string} */
-    this.description = timeline.parseWiki(description);
+    this.description = wiki.parse(description);
  
     /** @type {array.<timeline.Event>} */
     this.children = [];
  
     /** @type {number} */
     this.id = "evt" + (timeline.nextId++);
+  
+    /** @type {string} */
+    this.color = timeline.getColor(description);
+    
+    this.parent = null;
   
     if (timespan) {
         time.parseInterval(timespan, this);
@@ -68,7 +66,9 @@ timeline.Event.prototype.add = function(event) {
         }
     }
     this.children.push(event);
+    event.parent = this;
 };
+
 
 timeline.Event.prototype.expand = function() {
     var changed = false;

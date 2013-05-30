@@ -2,42 +2,56 @@
 <head>
     <title>Timeline</title>
     <style>
+        a:link, a:hover, a:active, a:visited { color: inherit; }
         * {
             box-sizing:border-box;
             -moz-box-sizing:border-box;
+        }
+        html {
+            font-size: 80%;
         }
         body {
             border:0;
             padding:0;
             margin:0;
             font-family:sans-serif;
-            height:100%
+            height:100%;
         }
-        div {
+        #timeline {
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        #timeline div {
             transition: left 0.5s;
             -webkit-transition: left 0.5s;
         }
-        .smooth div {
+        #timeline.smooth div {
           transition: top 0.5s, height 0.5s, left 0.5s, width 0.5s;
           -webkit-transition: top 0.5s, height 0.5s, left 0.5s, width 0.5s;
         }
-        .event {
+        #timeline  .event {
             border-top:1px solid black;
             position: absolute;
             overflow:hidden; 
         }
-        .span {
+        #timeline .span {
             overflow:hidden; 
             position: absolute;
         }
-        .text {
+        #timeline .text {
             padding: 3px;
-            font-size: small;
+            font-size:90%;
             overflow: hidden;
             position: relative;
             text-overflow: ellipsis;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
-        .rot {
+        #timeline .rot {
             padding: 3px;
             font-size: small;
             overflow: hidden;
@@ -51,25 +65,30 @@
             -webkit-transform-origin: top left;
             text-align: right;
         }
+
         #timepointer {
             width:100%;
             position:relative;
             text-align:right;
             padding-right:10px;
         }
+        #wikiFrame {
+            height:100%;
+            width:100%;
+        }
     </style>
 </head>
 <body style="">
     <table cellpadding=0 cellspacing=0 border=0 style="width:100%;height:100%">
         <tr>
-            <td width="160" valign="top"><div id="timepointer"></div></td>
-            <td><div id="timeline" style="overflow:hidden;position:relative;height:100%"></div></td>
-            <td width="320"><iframe id="wiki" style="height:100%;; "></iframe></td>
+            <td width="150" valign="top"><div id="timepointer"></div></td>
+            <td><div id="timeline"></div></td>
+            <td width="400"><iframe id="wikiFrame"></iframe></td>
         </tr>
     </table>
     <script src="utils.js"></script>
     <script>
-        load(['time', 'timeline', 'main']);
+        load(['time', 'colors', 'wiki', 'timeline', 'main']);
     </script>
 </body>
 </html>
