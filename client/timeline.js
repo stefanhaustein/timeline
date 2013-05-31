@@ -109,7 +109,7 @@ timeline.Event.prototype.expand = function() {
 
 
 timeline.Event.prototype.toString = function() {
-    return time.toString(this.start) + ' - ' + time.toString(this.end) + ': ' +
+    return time.toString(this.start) + ' – ' + time.toString(this.end) + ': ' +
         this.description;
 }
 

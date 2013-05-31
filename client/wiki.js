@@ -39,7 +39,7 @@ wiki.fetchWikiText = function(title, callback) {
     var callbackName = "globaljsonpcallback";
     window[callbackName] = function(response) {
         var pages = response['query']['pages'];
-        for (id in pages) {
+        for (var id in pages) {
             var page = pages[id];
             callback(page['revisions'][0]['*']);
         };

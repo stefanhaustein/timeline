@@ -116,7 +116,7 @@ function render(parentElement, parentY, event, nextStart, collapse, fraction, re
                 "position:absolute;top:0;left:0;height:"+height+";width:"+ remainingWidth + "px");
         } else {
             var lw;
-            if (collapse > 0 || event.description == "natural history") {
+            if (collapse >= 0) {
                 textDiv.className = "rot";
                 lw = ROT_LABEL_WIDTH;
                 textDiv.style.width = height;
