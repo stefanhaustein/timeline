@@ -66,9 +66,19 @@ function measureDepth(event) {
     return min;
 }
 
-function render(parentElement, parentY, event, nextStart, collapse, fraction, remainingWidth, remainingHeight) {
+function render(parentElement, parentY, event, nextStart, collapse, fraction, remainingWidth, viewportHeight) {
     var y = (event.start - timeOffset) * timeScale;
     var height = ((event.start == event.end ? nextStart : event.end) - event.start) * timeScale;
+    
+    if (y < -2 * viewportHeight) {
+        var rm = -(y + 2 * viewportHeight);
+        y += rm;
+        height -= rm;
+    }
+    if (height > 4 * viewportHeight) {
+        height = 4 * viewportHeight;
+    } 
+    
     var top = y - parentY;
     var count = event.children.length;
 
@@ -140,8 +150,7 @@ function render(parentElement, parentY, event, nextStart, collapse, fraction, re
     textDiv.style.display = height >= 20 ? "block": "none";
 
     if (remainingWidth < LABEL_WIDTH || height < 8 || 
-        y + height < -timelineElement.offsetHeight || 
-        y > 2 * timelineElement.offsetHeight) {
+            y + height < -viewportHeight || y > 2 * viewportHeight) {
         if (containerDiv) {
             containerDiv.innerHTML = "";
         }
@@ -152,7 +161,7 @@ function render(parentElement, parentY, event, nextStart, collapse, fraction, re
         var child = event.children[i];
         var cf = ((child.start + child.end) / 2 - event.start) / (event.end - event.start);
         var childNextStart = i < count - 1 ? event.children[i+1].start : event.end;
-        render(containerDiv, y, event.children[i], childNextStart, collapse - 1, cf, remainingWidth, remainingHeight);
+        render(containerDiv, y, event.children[i], childNextStart, collapse - 1, cf, remainingWidth, viewportHeight);
     }
 }
 

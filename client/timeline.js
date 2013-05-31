@@ -12,14 +12,18 @@ console.log(colors);
  */
 timeline.nextId = 0;
 
-timeline.getColor = function(s) {
-    s = string.trim(s);
-    var cut = s.indexOf(' ');
+timeline.getColor = function(name) {
+    var s = string.trim(name);
+    var cut = name.indexOf(']]');
     if (cut != -1) {
         s = s.substring(0, cut);
     }
-    s = s.replace('[[', '').replace(']]', '').toLowerCase();
-    return colors[s];
+    s = s.replace('[[', '').toLowerCase();
+    var rgb = colors[s];
+    if (!rgb) {
+        console.log("color not found: " + s + '/' + name);
+    }
+    return rgb;
 };
 
 /**
