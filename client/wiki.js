@@ -1,5 +1,11 @@
 var wiki = module.exports = exports = {};
 
+wiki.TIMELINES = [
+    "13,700 Ma - 0: Timeline of natural history",
+    "200,000 - 5,500 years ago: Timeline of human prehistory"
+];
+
+
 wiki.parse = function(s) {
     while(true) {
         var cut0 = s.indexOf("[[");
@@ -38,6 +44,7 @@ wiki.fetchHtml = function(title, callback) {
 wiki.fetchWikiText = function(title, callback) {
     var callbackName = "globaljsonpcallback";
     window[callbackName] = function(response) {
+        console.log(response);
         var pages = response['query']['pages'];
         for (var id in pages) {
             var page = pages[id];
@@ -46,6 +53,7 @@ wiki.fetchWikiText = function(title, callback) {
     };
     var url = "http://en.wikipedia.org/w/api.php?action=query&redirects&prop=revisions&rvprop=content&format=json&titles=" +
         encodeURIComponent(title) + "&callback=" + callbackName;
+    console.log("fetchWikiText: " + url);
     var script = document.createElement('script');
     script.setAttribute('src', url);
     document.getElementsByTagName('head')[0].appendChild(script);

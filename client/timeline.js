@@ -57,14 +57,18 @@ timeline.Event = function(timespan, description) {
 /**
  * @param {timeline.Event} event
  */
-timeline.Event.prototype.add = function(event) {
+timeline.Event.prototype.insert = function(event) {
     for (var i = 0; i < this.children.length; i++) {
         var child = this.children[i];
-        if (child.start < event.start && child.end > event.end) {
-            child.add(event);
+        if (child.start <= event.start && child.end >= event.end) {
+            child.insert(event);
             return;
         }
     }
+    this.append(event);
+};
+
+timeline.Event.prototype.append = function(event) {
     this.children.push(event);
     event.parent = this;
 };
@@ -99,19 +103,13 @@ timeline.Event.prototype.expand = function() {
             changed = true;
         }
     }
-    
-    
-    
-    if (changed) {
-        console.log("expanded: "+ this.toString());
-    }
-}
+};
 
 
 timeline.Event.prototype.toString = function() {
     return time.toString(this.start) + ' – ' + time.toString(this.end) + ': ' +
         this.description;
-}
+};
 
 /**
  * @param {string} text
@@ -146,7 +144,7 @@ timeline.Event.prototype.parse = function(text) {
                 console.log("level " + parent + " missing for heading: " + line);
                 parent--;
             }
-            stack[parent].add(current);
+            stack[parent].append(current);
             stack[heading] = current;
         } else if (string.startsWith(line, '*')) {
             line = line.substr(1);
@@ -154,7 +152,7 @@ timeline.Event.prototype.parse = function(text) {
             if (cut == -1) {
                 window.console.log('":" expected in line: "' + line + '"');
             } else {
-                current.add(new timeline.Event(line.substr(0, cut), line.substr(cut + 1)));
+                current.append(new timeline.Event(line.substr(0, cut), line.substr(cut + 1)));
             }
         }
     }

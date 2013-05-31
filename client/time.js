@@ -29,8 +29,10 @@ time.parse = function(s) {
     
     if (string.startsWith(unit, "Ma") ||
         string.startsWith(unit, "million years ago")) {
-        result *= -1000000.0;
-    } 
+        result = 2013 - 1000000.0 * result;
+    } else if (string.startsWith(unit, "years ago")) {
+        result = 2013 - result;
+    }
 
     if (isNaN(result)) {
         window.console.log("Not a number for '" + original + '"; unit: ' + unit);

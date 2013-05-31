@@ -1,4 +1,5 @@
 var timeline = require('timeline');
+var string = require('string');
 var time = require('time');
 var wiki = require('wiki');
 
@@ -289,13 +290,40 @@ document.onkeydown = function(event) {
 
 // startup
 
-var naturalHistory = new timeline.Event("13,700 Ma - 0", "natural history");
 
-wiki.fetchWikiText("Timeline of natural history", function(text) {
-    console.log("Wiki fetch result:");
-    naturalHistory.parse(text);
-    update(0);
-});
+
+function fetchWiki(root, index) {
+    console.log("fetchWiki " + index);
+    if (index >= wiki.TIMELINES.length) {
+        console.log("fetchWiki end reached")
+        return null;
+    }
+    var line = wiki.TIMELINES[index];
+    console.log("fetchWiki " + line);
+    var cut = line.indexOf(':');
+    var span = line.substr(0, cut);
+    var title = string.trim(line.substr(cut + 1));
+    var event = new timeline.Event(span, title);
+    wiki.fetchWikiText(title, function(text) {
+        console.log("Wiki fetch result:");
+        event.parse(text);
+        if (root) {
+            for (var i = 0; i < event.children.length; i++) {
+                root.insert(event.children[i]);
+            }
+        } else {
+            root = event;
+        }
+        update(0);
+        console.log("fetchWiki recursion");
+        fetchWiki(root, index + 1);
+    });
+    return event;
+}
+
+var naturalHistory = fetchWiki(null, 0);
+
+
 
 /*    
 var req = new XMLHttpRequest();
