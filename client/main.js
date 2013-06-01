@@ -2,6 +2,7 @@ var timeline = require('timeline');
 var string = require('string');
 var time = require('time');
 var wiki = require('wiki');
+var quirks = require('quirks');
 var gutterPackage = require('gutter');
 
 var gutter = new gutterPackage.Gutter(document.getElementById('gutter'));
@@ -10,7 +11,7 @@ var timelineElement = document.getElementById('timeline');
 var wikiFrame = document.getElementById('wikiFrame');
 
 var LABEL_WIDTH = 150;
-var ROT_LABEL_WIDTH = 30;
+var ROT_LABEL_WIDTH = 24;
 
 var minOffset = -13700000000;
 var timeOffset = minOffset;
@@ -108,8 +109,15 @@ function render(parentElement, parentY, event, nextStart, collapse, fraction, re
         }
         if (event.start < event.end) {
             var rgb = event.color;
-            element.style.backgroundColor = 
-                rgb ? "rgb(" +rgb[0]+ "," + rgb[1] + "," + rgb[2]+")" : hsvToRgb(360.0 * fraction, 0.5, 0.5);
+            if (!rgb && event.parent && event.parent.color) {
+                var prgb = event.parent.color;
+                var f = fraction + 0.5;
+                rgb = [prgb[0]*f, prgb[1]*f, prgb[2]*f];
+                window.console.log(rgb);
+            }
+            element.style.backgroundColor = rgb ? 
+                'rgb(' + Math.floor(rgb[0])+ "," + Math.floor(rgb[1]) + "," + Math.floor(rgb[2])+')' : 
+                hsvToRgb(360.0 * fraction, 0.5, 0.5);
             element.style.borderColor = element.style.color = (rgb && toGrayscale(rgb) < 48) ? "#ccc" : "#333";
         } 
     } else {
@@ -126,7 +134,7 @@ function render(parentElement, parentY, event, nextStart, collapse, fraction, re
     element.style.width = remainingWidth;
    
     if (count) {
-        if (false && event.description == "natural history") {
+        if (event.description == "Timeline of natural history") {
             textDiv.style.display = "none";
             containerDiv.setAttribute("style",
                 "position:absolute;top:0;left:0;height:"+height+";width:"+ remainingWidth + "px");
@@ -181,7 +189,7 @@ function update(y, smooth) {
         timeOffset = minOffset;
     }
     var tbottom = yToTime(timelineElement.offsetHeight);
-    if (tbottom > 0) {
+    if (tbottom > 2013) {
         timeOffset -= tbottom;
     }
 
@@ -197,10 +205,24 @@ function update(y, smooth) {
 }
 
 
+function updateTimePointer(y) {
+    timePointer.style.top = y - timePointer.offsetHeight / 2;
+    var t = yToTime(y);
+    timePointer.innerHTML = time.toString(t) + " –";
+    
+    var index = 0;
+    while (index+1 < wiki.GLOBAL.length && wiki.GLOBAL[index+1][0] < t) {
+        index++;
+    }
+    var imgName = wiki.GLOBAL[index][6];
+    var cut = imgName.lastIndexOf('/');
+    earthImage.src = "http://upload.wikimedia.org/wikipedia/commons/thumb/" + imgName + "/200px-" + imgName.substr(cut + 1);
+}
+
 // Event handlers 
 
 
-timelineElement.addEventListener('DOMMouseScroll', onMouseWheel, false);  
+//timelineElement.addEventListener('DOMMouseScroll', onMouseWheel, false);  
 timelineElement.addEventListener("mousewheel", onMouseWheel, false);
 
 timelineElement.onclick = function(event) {
@@ -221,6 +243,9 @@ timelineElement.onclick = function(event) {
                 element = element.parentElement;
             } while(e == null && element != null);
             if (e) {
+                while (e.end == e.start) {
+                    e = e.parent;
+                }
                 timeOffset = e.start;
                 timeScale = timelineElement.offsetHeight / (e.end - e.start);
                 update(event.clientY, true);
@@ -230,19 +255,7 @@ timelineElement.onclick = function(event) {
     }
 };
 
-function updateTimePointer(y) {
-    timePointer.style.top = y - timePointer.offsetHeight / 2;
-    var t = yToTime(y);
-    timePointer.innerHTML = time.toString(t) + " –";
-    
-    var index = 0;
-    while (index+1 < wiki.GLOBAL.length && wiki.GLOBAL[index+1][0] < t) {
-        index++;
-    }
-    var imgName = wiki.GLOBAL[index][6];
-    var cut = imgName.lastIndexOf('/');
-    earthImage.src = "http://upload.wikimedia.org/wikipedia/commons/thumb/" + imgName + "/200px-" + imgName.substr(cut + 1);
-}
+
 
 window.onresize = function(e) {
     console.log(e);
@@ -251,30 +264,34 @@ window.onresize = function(e) {
         update(0);
 };
 
-function onMouseWheel(event) {
+function onMouseWheel(e) {
     var factor = 1.1;
-    var delta = event.wheelDeltaY;
-    var y = event.clientY;
-    if (event.shiftKey) {
+    var delta = quirks.getNormalizedWheelDeltaY(event);
+    var y = e.clientY;
+    if (e.shiftKey) {
+        // Auto-axis swap in chrome...
+        if (delta == 0) {
+            delta = e.wheelDeltaX;
+        }
         if (delta < 0) {
             // middle between y and  middle to zoom out
             y = (y + (timelineElement.offsetHeight / 2)) / 2;
             timeOffset = yToTime(y);
             timeScale /= factor;
             timeOffset += yToTime(0) - yToTime(y);
-        } else {
+        } else if (delta > 0) {
             // move y beyond to simplify zooming into corners
             y = y + (y - timelineElement.offsetHeight / 2) * 0.2;
             timeOffset = yToTime(y);
             timeScale *= factor;
             timeOffset += yToTime(0) - yToTime(y);
         }
-        event.preventDefault();
-        update(event.clientY);
+        e.preventDefault();
+        update(e.clientY);
     } else {
         var oldOffset = timeOffset;
         timeOffset += delta / timeScale;
-        update(event.clientY);
+        update(e.clientY);
         if (timeOffset !== oldOffset) {
             event.preventDefault();
         }
@@ -329,9 +346,7 @@ function fetchWiki(root, index) {
         console.log("Wiki fetch result:");
         event.parse(text);
         if (root) {
-            for (var i = 0; i < event.children.length; i++) {
-                root.insert(event.children[i]);
-            }
+            root.insert(event);
         } else {
             root = event;
         }

@@ -20,9 +20,6 @@ timeline.getColor = function(name) {
     }
     s = s.replace('[[', '').toLowerCase();
     var rgb = colors[s];
-    if (!rgb) {
-        console.log("color not found: " + s + '/' + name);
-    }
     return rgb;
 };
 
@@ -116,6 +113,7 @@ timeline.Event.prototype.toString = function() {
 };
 
 /**
+ * Parses sub events into the given event.
  * @param {string} text
  */
 timeline.Event.prototype.parse = function(text) {
@@ -156,7 +154,13 @@ timeline.Event.prototype.parse = function(text) {
             if (cut == -1) {
                 window.console.log('":" expected in line: "' + line + '"');
             } else {
-                current.append(new timeline.Event(line.substr(0, cut), line.substr(cut + 1)));
+                var t = string.trim(line.substr(0, cut));
+                if (t == '200,000 - 50,000 years ago') {
+                    window.console.log('skipping: ' + line);
+                } else {
+                    var markup = line.substr(cut + 1)
+                    current.append(new timeline.Event(t, markup));
+                }
             }
         }
     }
