@@ -4,8 +4,8 @@ var time = require('time');
 var wiki = require('wiki');
 var quirks = require('quirks');
 var gutterPackage = require('gutter');
-
-var gutter = new gutterPackage.Gutter(document.getElementById('gutter'));
+var gutterElement = document.getElementById('gutter');
+var gutter = new gutterPackage.Gutter(gutterElement);
 
 var timelineElement = document.getElementById('timeline');
 var wikiFrame = document.getElementById('wikiFrame');
@@ -210,13 +210,15 @@ function updateTimePointer(y) {
     var t = yToTime(y);
     timePointer.innerHTML = time.toString(t) + " –";
     
+    // use binary search!
     var index = 0;
-    while (index+1 < wiki.GLOBAL.length && wiki.GLOBAL[index+1][0] < t) {
+    while (index+1 < wiki.GLOBES.length && wiki.GLOBES[index+1][0] < t) {
         index++;
     }
-    var imgName = wiki.GLOBAL[index][6];
+    var imgName = wiki.GLOBES[index][1];
     var cut = imgName.lastIndexOf('/');
     earthImage.src = "http://upload.wikimedia.org/wikipedia/commons/thumb/" + imgName + "/200px-" + imgName.substr(cut + 1);
+    earthImage.setAttribute('href', '#File:' + imgName.substr(cut + 1));
 }
 
 // Event handlers 
@@ -224,34 +226,28 @@ function updateTimePointer(y) {
 
 //timelineElement.addEventListener('DOMMouseScroll', onMouseWheel, false);  
 timelineElement.addEventListener("mousewheel", onMouseWheel, false);
+gutterElement.addEventListener("mousewheel", onMouseWheel, false);
 
-timelineElement.onclick = function(event) {
+gutterElement.onclick = timelineElement.onclick = function(event) {
     var element = event.target;
-    if (element) { 
+    while (element) {
         var href = element.getAttribute("href");
-        //wiki.fetchHtml(href.substr(1), function(s) {
-        //    console.log(s);
-        //    wikiFrame.innerHTML = s;
-        //});
+        var e = element['_event_'];
         if (href) {
             wikiFrame.src = "http://en.m.wikipedia.org/wiki/"+ href.substr(1);  
             event.preventDefault();
-        } else {
-            var e = null;
-            do {
-                e = element['_event_'];
-                element = element.parentElement;
-            } while(e == null && element != null);
-            if (e) {
-                while (e.end == e.start) {
-                    e = e.parent;
-                }
-                timeOffset = e.start;
-                timeScale = timelineElement.offsetHeight / (e.end - e.start);
-                update(event.clientY, true);
-                event.preventDefault();
+            break;
+        } else if (e) {
+            while (e.end == e.start) {
+                e = e.parent;
             }
+            timeOffset = e.start;
+            timeScale = timelineElement.offsetHeight / (e.end - e.start);
+            update(event.clientY, true);
+            event.preventDefault();
+            break;
         }
+        element = element.parentElement;
     }
 };
 
@@ -358,7 +354,7 @@ function fetchWiki(root, index) {
 }
 
 var naturalHistory = fetchWiki(null, 0);
-
+gutterElement['_event_'] = naturalHistory;
 
 
 /*    

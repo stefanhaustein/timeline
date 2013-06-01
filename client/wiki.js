@@ -5,8 +5,38 @@ wiki.TIMELINES = [
     "200,000 - 5,500 years ago: Timeline of human prehistory"
 ];
 
-     // start, Label,          o2,  co2, tmp, sea, image
-wiki.GLOBAL = [
+wiki.GLOBES = [
+    [-13000e6, "3/3c/Ilc_9yr_moll4096.png"],
+    [-600e6, "e/e9/Blakey_600moll.jpg"],
+    [-560e6, "7/7d/Blakey_560moll.jpg"],
+    [-500e6, "c/ca/Blakey_500moll.jpg"],
+    [-470e6, "8/8a/Blakey_470moll.jpg"],
+    [-450e6, "3/31/Blakey_450moll.jpg"],
+    [-430e6, "8/88/Blakey_430moll.jpg"],
+    [-400e6, "c/cc/Blakey_400moll.jpg"],
+    [-370e6, "9/90/Blakey_370moll.jpg"],
+    [-340e6, "3/3f/Blakey_340moll.jpg"],
+    [-300e6, "8/87/Blakey_300moll.jpg"],
+    [-280e6, "5/5c/Blakey_280moll.jpg"],
+    [-260e6, "3/3d/Blakey_260moll.jpg"],
+    [-240e6, "6/6f/Blakey_240moll.jpg"],
+    [-220e6, "e/e6/Blakey_220moll.jpg"],
+    [-200e6, "f/f2/Blakey_200moll.jpg"],
+    [-170e6, "a/a8/Blakey_170moll.jpg"],
+    [-150e6, "3/34/Blakey_150moll.jpg"],
+    [-105e6, "6/6c/Blakey_105moll.jpg"],
+    [-90e6, "d/dc/Blakey_90moll.jpg"],
+    [-65e6, "1/10/Blakey_65moll.jpg"],
+    [-50e6, "b/ba/Blakey_50moll.jpg"],
+    [-35e6, "7/73/Blakey_35moll.jpg"],
+    [-20e6, "2/2c/Blakey_20moll.jpg"],
+    [-5e6, "7/7e/Blakey_Pleistmoll.jpg"],
+    [-2e6,  "b/b2/Blakey_presentmoll.jpg"]
+];
+
+
+// start, Label,          o2,  co2, tmp, sea, image
+wiki.ENVIRONMENT = [
     [-13000e6, "Big Bang",    null, null,null,null, "3/3c/Ilc_9yr_moll4096.png"],
     [-635.0e6, "Edicaran",     8.0, 4500,null,null, "e/e9/Blakey_600moll.jpg"],
     [-541.0e6, "Cambrian",    12.5, 4500,  21,  60, "c/ca/Blakey_500moll.jpg"],
