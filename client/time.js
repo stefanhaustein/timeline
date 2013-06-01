@@ -46,8 +46,8 @@ time.parse = function(s) {
  * @param {number} time
  */
 time.toString = function(time) {
-    if (time < -10000) {
-        return "" + (time / -1000000.0).toFixed(2) + " Ma";
+    if (time < -100000) {
+        return "" + ((time-2013) / -1000000.0).toFixed(2) + " Ma";
     } 
     return "" + time.toFixed(0);
 };

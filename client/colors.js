@@ -1,6 +1,6 @@
 var colors = module.exports = exports = {
   
-  'timeline of natural history': [32,32,32],
+  'timeline of natural history': [0,0,0],
   'formation of the universe': [0,0,128],
   
   precambrian             : [247, 67, 112],
