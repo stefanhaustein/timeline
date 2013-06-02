@@ -32,7 +32,7 @@
             width: 100%;
             pointer-events: none;
         }
-        #gutter #timepointer {
+        #timepointer {
             width:100%;
             position:relative;
             text-align:right;
@@ -41,7 +41,6 @@
             z-index:1;
             pointer-events: none;
         }
-
         
         #timeline {
             height: 100%;
@@ -109,11 +108,11 @@
             <td width="200" valign="top">
                 <div id="gutter">
                   <div id="timepointer"></div>
-                  <a id="earthLink" href='#'><img id="earthImage"></img></a>
+                  <img id="earthImage"></img>
                 </div>
             </td>
             <td><div id="timeline"></div></td>
-            <td width="400"><iframe id="wikiFrame"></iframe></td>
+            <td width="30%"><iframe id="wikiFrame" src="help.html"></iframe></td>
         </tr>
     </table>
     <script src="utils.js"></script>

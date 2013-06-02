@@ -19,11 +19,8 @@ gutter.Gutter.prototype.update = function(timeOffset, timeScale) {
     var digits = Math.round(Math.log(idealTimeStep) / Math.log(10));
     var timeStep = Math.pow(10, digits);
     var pixelStep = timeStep * timeScale;
-    if (pixelStep > idealStep * 1.5) {
-        timeStep /= 2;
-    } else if (pixelStep < idealStep / 1.5) {
-        timeStep *= 2.5;
-    }
+    
+    // start two steps up.
     var t = (Math.round(timeOffset / timeStep) - 2) * timeStep;
     var test1 = time.parse(time.toString(t));
     var test2 = time.parse(time.toString(t + timeStep));
@@ -31,7 +28,20 @@ gutter.Gutter.prototype.update = function(timeOffset, timeScale) {
         Math.abs(test2 - (t + timeStep)) > timeStep;
     
     this.epoch++;
-    var hideLabel = false;
+
+    var subDivision;
+    var halfDash = "–";
+    if (pixelStep < 24) {
+        timeStep *= 2;
+        subDivision = 2;
+        halfDash = "—";
+    } else { 
+        subDivision = pixelStep > 64 ? 4 : pixelStep > 32 ? 2 : 1; 
+    }
+    var subStep = 0;
+    
+    window.console.log("pixelStep:" + pixelStep);
+    
     while(true) {
         var key =  "" + t;
         var child = this.elements[key];
@@ -41,16 +51,26 @@ gutter.Gutter.prototype.update = function(timeOffset, timeScale) {
             this.element.appendChild(child);
             this.elements[key] = child;
         }
-        var label = hideLabel ? '' : (useKey ? key : time.toString(t));
-        child.innerHTML = label + " –";
+        var label;
+        switch(subStep * (4/subDivision) % 4) {
+            case 0: 
+                label = (useKey ? key : time.toString(t)) + " —";
+                break;
+            case 2:
+                label = halfDash;
+                break;
+            default:
+                label = "-";
+        }
+        child.innerHTML = label;
         var y = Math.round((t - timeOffset) * timeScale);
         child.style.top = y - child.offsetHeight / 2;
         child['_epoch_'] = this.epoch;
         if (y > viewportHeight) {
             break;
         }
-        t += timeStep/2;
-        hideLabel = !hideLabel;
+        t += timeStep/subDivision;
+        subStep++;
     }
     for (var key in this.elements) {
         var child = this.elements[key];

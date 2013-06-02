@@ -12,10 +12,12 @@ var wikiFrame = document.getElementById('wikiFrame');
 
 var LABEL_WIDTH = 150;
 var ROT_LABEL_WIDTH = 24;
+var ZOOM_FACTOR = 1.1;
 
+// TODO: Derive from root.
 var minOffset = -13700000000;
 var timeOffset = minOffset;
-var minScale = timelineElement.offsetHeight / -minOffset;
+var minScale = timelineElement.offsetHeight / (-minOffset + 2013);
 var timeScale = minScale;
 var timePointer = document.getElementById("timepointer");
 
@@ -190,7 +192,7 @@ function update(y, smooth) {
     }
     var tbottom = yToTime(timelineElement.offsetHeight);
     if (tbottom > 2013) {
-        timeOffset -= tbottom;
+        timeOffset -= tbottom-2013;
     }
 
     var w = timelineElement.offsetWidth;
@@ -217,7 +219,7 @@ function updateTimePointer(y) {
     }
     var imgName = wiki.GLOBES[index][1];
     var cut = imgName.lastIndexOf('/');
-    earthImage.src = "http://upload.wikimedia.org/wikipedia/commons/thumb/" + imgName + "/200px-" + imgName.substr(cut + 1);
+    earthImage.src="http://upload.wikimedia.org/wikipedia/commons/thumb/" + imgName + "/200px-" + imgName.substr(cut + 1);
     earthImage.setAttribute('href', '#File:' + imgName.substr(cut + 1));
 }
 
@@ -252,46 +254,58 @@ gutterElement.onclick = timelineElement.onclick = function(event) {
 };
 
 
+function zoom(y, factor) {
+    timeOffset = yToTime(y);
+    timeScale *= factor;
+    timeOffset += yToTime(0) - yToTime(y);
+}
+
+
+function move(y, delta) {
+    console.log("bottom time: " + yToTime(timelineElement.offsetHeight));
+    if (delta < 0 && timeOffset <= minOffset) {
+        zoom(0, 1.1);
+    } else if (delta > 0 && yToTime(timelineElement.offsetHeight + 1) > 2013) {
+        zoom(timelineElement.offsetHeight, 1.1);
+    } else {
+        timeOffset += delta / timeScale;
+    }
+}
+
 
 window.onresize = function(e) {
     console.log(e);
     timelineElement.style.height = window.innerHeight;
     minScale = window.innerHeight / -minOffset;
-        update(0);
+    update(e.clientY);
 };
+
+
 
 function onMouseWheel(e) {
     var factor = 1.1;
     var delta = quirks.getNormalizedWheelDeltaY(event);
     var y = e.clientY;
+    // shift -> zoom
+    if (e.ctrlKey || e.altKey) {
+        return;
+    }
+    
     if (e.shiftKey) {
         // Auto-axis swap in chrome...
         if (delta == 0) {
             delta = e.wheelDeltaX;
         }
         if (delta < 0) {
-            // middle between y and  middle to zoom out
-            y = (y + (timelineElement.offsetHeight / 2)) / 2;
-            timeOffset = yToTime(y);
-            timeScale /= factor;
-            timeOffset += yToTime(0) - yToTime(y);
+            zoom(y, ZOOM_FACTOR);
         } else if (delta > 0) {
-            // move y beyond to simplify zooming into corners
-            y = y + (y - timelineElement.offsetHeight / 2) * 0.2;
-            timeOffset = yToTime(y);
-            timeScale *= factor;
-            timeOffset += yToTime(0) - yToTime(y);
+            zoom(y, 1/ZOOM_FACTOR);
         }
-        e.preventDefault();
-        update(e.clientY);
     } else {
-        var oldOffset = timeOffset;
-        timeOffset += delta / timeScale;
-        update(e.clientY);
-        if (timeOffset !== oldOffset) {
-            event.preventDefault();
-        }
+        move(y, delta);
     }
+    e.preventDefault();
+    update(e.clientY);
 }
 
 document.onmousemove = function(event) {
@@ -304,17 +318,13 @@ document.onkeydown = function(event) {
     var char = event.which == null ? event.keyCode : event.which;
     var y = timelineElement.offsetHeight / 2;
     if (char === 187) {
-        timeOffset = yToTime(y);
-        timeScale *= 3.0/2.0;
-        timeOffset += yToTime(0) - yToTime(y);
+        zoom(y, ZOOM_FACTOR);
     } else if (char === 189) {
-        timeOffset = yToTime(y);
-        timeScale *= 2.0/3.0;
-        timeOffset += yToTime(0) - yToTime(y);
+        zoom(y, 1/ZOOM_FACTOR);
     } else if (char === 38) {
-        timeOffset -= 10 / timeScale;
+        move(y, 10);
     } else if (char === 40) {
-        timeOffset += 10 / timeScale;
+        move(y, -10);
     } else {
         return;
     }
