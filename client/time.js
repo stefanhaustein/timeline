@@ -24,6 +24,9 @@ time.parse = function(s) {
     if (cut != -1) {
         s = s.substr(0, cut);
     }
+    if (string.endsWith(s, 's')) {
+        s = s.substr(0, s.length - 1);
+    }
     
     var result = parseFloat(s);
     
@@ -32,6 +35,8 @@ time.parse = function(s) {
         result = 2013 - 1000000.0 * result;
     } else if (string.startsWith(unit, "years ago")) {
         result = 2013 - result;
+    } else if (unit == 'BC' || unit == 'BCE') {
+        result = -(result - 1);
     }
 
     if (isNaN(result)) {
@@ -52,6 +57,8 @@ time.toString = function(time) {
     return "" + time.toFixed(0);
 };
 
+time.DASHES = ['–', '-', '—', ' to ', '&mdash;']
+
 /** 
  * Parses a time interval to the start and end properties of the given
  * target object.
@@ -60,17 +67,22 @@ time.toString = function(time) {
  * @param {{start: number, end: number}} target
  */
 time.parseInterval = function(s, target) {
-    var cut = s.indexOf('–');
-    if (cut == -1) {
-        cut = s.indexOf('-');
+    
+    var dash;
+    var cut = -1;
+    for (var i = 0; i < time.DASHES.length; i++) {
+        dash = time.DASHES[i];
+        cut = s.indexOf(dash);
+        if (cut != -1) break;
     }
+    
     if (cut == -1) {
         target.start = target.end = time.parse(s);
         return;
     }
     
     var s0 = string.trim(s.substr(0, cut));
-    var s1 = string.trim(s.substr(cut + 1));
+    var s1 = string.trim(s.substr(cut + dash.length));
     
     // Copy the unit to the first time if only the second has one
     if (s0.length > 0 && s0.charAt(s0.length - 1) >= '0' && s0.charAt(s0.length - 1) <= '9') {

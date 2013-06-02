@@ -23,6 +23,13 @@ var timePointer = document.getElementById("timepointer");
 
 var earthImage = document.getElementById('earthImage');
 
+var naturalHistory = new timeline.Event(
+    wiki.TIMELINES[0], wiki.TIMELINES[1], wiki.TIMELINES[2], wiki.TIMELINES[3], wiki.TIMELINES[4]);
+var lastMouseY = timelineElement.offsetHeight / 2;
+
+gutterElement['_event_'] = naturalHistory;
+
+
 function timeToY(t) {
     return (t - timeOffset) * timeScale;
 }
@@ -102,10 +109,10 @@ function render(parentElement, parentY, event, nextStart, collapse, fraction, re
         element['_event_'] = event;
         textDiv = document.createElement("div");
         textDiv.className = 'text';
-        textDiv.innerHTML = event.description;
+        textDiv.innerHTML = event.getHtml();
         parentElement.appendChild(element);
         element.appendChild(textDiv);
-        if (count) {
+        if (count || event.needsFetch || event.fetchChildren) {
             containerDiv = document.createElement("div");
             element.appendChild(containerDiv);
         }
@@ -172,6 +179,13 @@ function render(parentElement, parentY, event, nextStart, collapse, fraction, re
         return;
     }
     
+    if (event.needsFetch) {
+        console.log("Fetching Wikipedia data for " + event.description);
+        event.fetchData(function(){
+            update();    
+        });
+    }
+    
     for (var i = 0; i < event.children.length; i++) {
         var child = event.children[i];
         var cf = ((child.start + child.end) / 2 - event.start) / (event.end - event.start);
@@ -181,7 +195,7 @@ function render(parentElement, parentY, event, nextStart, collapse, fraction, re
 }
 
 
-function update(y, smooth) {
+function update(smooth) {
     timelineElement.className = smooth ? "smooth" : "";
 
     if (timeScale < minScale) {
@@ -201,15 +215,15 @@ function update(y, smooth) {
     
     gutter.update(timeOffset, timeScale);
     
-    updateTimePointer(y);
+    updateTimePointer();
     
     render(timelineElement, 0, naturalHistory, 0, measureDepth(naturalHistory), 0.5, w, h);
 }
 
 
-function updateTimePointer(y) {
-    timePointer.style.top = y - timePointer.offsetHeight / 2;
-    var t = yToTime(y);
+function updateTimePointer() {
+    timePointer.style.top = lastMouseY - timePointer.offsetHeight / 2;
+    var t = yToTime(lastMouseY);
     timePointer.innerHTML = time.toString(t) + " –";
     
     // use binary search!
@@ -232,6 +246,7 @@ gutterElement.addEventListener("mousewheel", onMouseWheel, false);
 
 gutterElement.onclick = timelineElement.onclick = function(event) {
     var element = event.target;
+    lastMouseY = event.clientY;
     while (element) {
         var href = element.getAttribute("href");
         var e = element['_event_'];
@@ -245,7 +260,7 @@ gutterElement.onclick = timelineElement.onclick = function(event) {
             }
             timeOffset = e.start;
             timeScale = timelineElement.offsetHeight / (e.end - e.start);
-            update(event.clientY, true);
+            update(true);
             event.preventDefault();
             break;
         }
@@ -275,17 +290,17 @@ function move(y, delta) {
 
 window.onresize = function(e) {
     console.log(e);
+    lastMouseY = e.clientY;
     timelineElement.style.height = window.innerHeight;
     minScale = window.innerHeight / -minOffset;
-    update(e.clientY);
+    update();
 };
 
 
 
 function onMouseWheel(e) {
-    var factor = 1.1;
     var delta = quirks.getNormalizedWheelDeltaY(event);
-    var y = e.clientY;
+    lastMouseY = e.clientY;
     // shift -> zoom
     if (e.ctrlKey || e.altKey) {
         return;
@@ -297,19 +312,20 @@ function onMouseWheel(e) {
             delta = e.wheelDeltaX;
         }
         if (delta < 0) {
-            zoom(y, ZOOM_FACTOR);
+            zoom(lastMouseY, ZOOM_FACTOR);
         } else if (delta > 0) {
-            zoom(y, 1/ZOOM_FACTOR);
+            zoom(lastMouseY, 1/ZOOM_FACTOR);
         }
     } else {
-        move(y, delta);
+        move(lastMouseY, delta);
     }
     e.preventDefault();
-    update(e.clientY);
+    update();
 }
 
 document.onmousemove = function(event) {
-    updateTimePointer(event.clientY);
+    lastMouseY = event.clientY;
+    updateTimePointer();
 };
 
 
@@ -332,39 +348,14 @@ document.onkeydown = function(event) {
 };
 
 
+update();
+
 // startup
 
 
 
-function fetchWiki(root, index) {
-    console.log("fetchWiki " + index);
-    if (index >= wiki.TIMELINES.length) {
-        console.log("fetchWiki end reached")
-        return null;
-    }
-    var line = wiki.TIMELINES[index];
-    console.log("fetchWiki " + line);
-    var cut = line.indexOf(':');
-    var span = line.substr(0, cut);
-    var title = string.trim(line.substr(cut + 1));
-    var event = new timeline.Event(span, title);
-    wiki.fetchWikiText(title, function(text) {
-        console.log("Wiki fetch result:");
-        event.parse(text);
-        if (root) {
-            root.insert(event);
-        } else {
-            root = event;
-        }
-        update(0);
-        console.log("fetchWiki recursion");
-        fetchWiki(root, index + 1);
-    });
-    return event;
-}
 
-var naturalHistory = fetchWiki(null, 0);
-gutterElement['_event_'] = naturalHistory;
+
 
 
 /*    

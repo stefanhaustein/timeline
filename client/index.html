@@ -23,7 +23,7 @@
             height: 100%;
             overflow: hidden;
             position: relative;
-            background-color:#000;
+            background: -webkit-linear-gradient(top, #000, #000, #888, #fff, #fff);
             color:#ddd;
         }
         #gutter .timeStep {
@@ -32,6 +32,12 @@
             width: 100%;
             pointer-events: none;
         }
+        
+        #bottomimage {
+            position:absolute;
+            bottom:0;
+        }
+        
         #timepointer {
             width:100%;
             position:relative;
@@ -109,6 +115,7 @@
                 <div id="gutter">
                   <div id="timepointer"></div>
                   <img id="earthImage"></img>
+                  <img id="bottomImage"></img>
                 </div>
             </td>
             <td><div id="timeline"></div></td>

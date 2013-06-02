@@ -6,12 +6,13 @@ gutter.Gutter = function(element) {
     this.element = element;   
     this.elements = {};
     this.epoch = 0;
+    
 };
 
 
 gutter.Gutter.prototype.update = function(timeOffset, timeScale) {
     var viewportHeight = this.element.offsetHeight;
-        
+
     var idealStepCount = viewportHeight / 50;    
     var idealStep = viewportHeight / idealStepCount;
     var idealTimeStep = idealStep / timeScale;
@@ -40,8 +41,6 @@ gutter.Gutter.prototype.update = function(timeOffset, timeScale) {
     }
     var subStep = 0;
     
-    window.console.log("pixelStep:" + pixelStep);
-    
     while(true) {
         var key =  "" + t;
         var child = this.elements[key];
@@ -64,6 +63,9 @@ gutter.Gutter.prototype.update = function(timeOffset, timeScale) {
         }
         child.innerHTML = label;
         var y = Math.round((t - timeOffset) * timeScale);
+        
+        child.style.color = (y > viewportHeight / 2) ? '#333' : '#ddd'
+        
         child.style.top = y - child.offsetHeight / 2;
         child['_epoch_'] = this.epoch;
         if (y > viewportHeight) {

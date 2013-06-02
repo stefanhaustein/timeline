@@ -1,8 +1,22 @@
 var wiki = module.exports = exports = {};
 
+wiki.FORMAT_LIST = ['*', ':', 0, 1];
+
 wiki.TIMELINES = [
-    "13,700 Ma - 2013: Timeline of natural history",
-    "200,000 - 5,500 years ago: Timeline of human prehistory"
+    "13,700 Ma - 2013", "Timeline of natural history", wiki.FORMAT_LIST, null, [
+        ["200,000 years ago - 2013", "Timeline of human history", null, null, [
+            ["200,000 - 5,500 years ago", "Timeline of human prehistory", wiki.FORMAT_LIST],
+            ["5,500 years ago - 476", "Timeline of ancient history", wiki.FORMAT_LIST],
+            ["476 - 1500", "Timeline of the Middle Ages", ['|', '||', 0, 2]],
+            ["1500 - 1900", "Timeline of early modern history", null, null, [ 
+                ["1500 - 1600", "16th_century", wiki.FORMAT_LIST, "Events"],
+                ["1600 - 1700", "17th_century", wiki.FORMAT_LIST, "Events"],
+                ["1700 - 1800", "18th_century", wiki.FORMAT_LIST, "Events"],
+                ["1800 - 1900", "19th_century", wiki.FORMAT_LIST, "Events"],
+            ]],
+            ["1900 - 2013", "Timeline of modern history", wiki.FORMAT_LIST]
+        ]]
+    ]
 ];
 
 wiki.GLOBES = [
@@ -77,6 +91,15 @@ wiki.parse = function(s) {
         
         s = s.substr(0, cut0) + '<a href="#' + link + '">' + label + "</a>" + s.substring(cut1 + 2);
     }
+    
+    while(true) {
+        var cut0 = s.indexOf("{{");
+        if (cut0 == -1) break;
+        var cut1 = s.indexOf('}}');
+        if (cut1 == -1) break;
+        s = s.substr(0, cut0) + s.substring(cut1 + 2);
+    }
+    
     return s;
 };
 
