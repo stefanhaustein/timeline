@@ -1,7 +1,7 @@
 var timeline = require('timeline');
 var string = require('string');
 var time = require('time');
-var wiki = require('wiki');
+var data = require('data');
 var quirks = require('quirks');
 var gutterPackage = require('gutter');
 var gutterElement = document.getElementById('gutter');
@@ -24,7 +24,7 @@ var timePointer = document.getElementById("timepointer");
 var earthImage = document.getElementById('earthImage');
 
 var naturalHistory = new timeline.Event(
-    wiki.TIMELINES[0], wiki.TIMELINES[1], wiki.TIMELINES[2], wiki.TIMELINES[3], wiki.TIMELINES[4]);
+    data.TIMELINES[0], data.TIMELINES[1], data.TIMELINES[2], data.TIMELINES[3], data.TIMELINES[4]);
 var lastMouseY = timelineElement.offsetHeight / 2;
 
 gutterElement['_event_'] = naturalHistory;
@@ -126,7 +126,7 @@ function render(parentElement, parentY, event, nextStart, collapse, fraction, re
             }
             element.style.backgroundColor = rgb ? 
                 'rgb(' + Math.floor(rgb[0])+ "," + Math.floor(rgb[1]) + "," + Math.floor(rgb[2])+')' : 
-                hsvToRgb(360.0 * fraction, 0.5, 0.5);
+                hsvToRgb(360.0 * fraction, 0.5, 1);
             element.style.borderColor = element.style.color = (rgb && toGrayscale(rgb) < 48) ? "#ccc" : "#333";
         } 
     } else {
@@ -228,10 +228,10 @@ function updateTimePointer() {
     
     // use binary search!
     var index = 0;
-    while (index+1 < wiki.GLOBES.length && wiki.GLOBES[index+1][0] < t) {
+    while (index+1 < data.GLOBES.length && data.GLOBES[index+1][0] < t) {
         index++;
     }
-    var imgName = wiki.GLOBES[index][1];
+    var imgName = data.GLOBES[index][1];
     var cut = imgName.lastIndexOf('/');
     earthImage.src="http://upload.wikimedia.org/wikipedia/commons/thumb/" + imgName + "/200px-" + imgName.substr(cut + 1);
     earthImage.setAttribute('href', '#File:' + imgName.substr(cut + 1));

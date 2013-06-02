@@ -1,11 +1,8 @@
 var timeline = module.exports = exports = {};
 var time = require('time');
 var string = require('string');
-var colors = require('colors');
+var data = require('data');
 var wiki = require('wiki');
-
-console.log("colors:");
-console.log(colors);
 
 /** 
  * @type {number}
@@ -19,7 +16,7 @@ timeline.getColor = function(name) {
         s = s.substring(0, cut);
     }
     s = s.replace('[[', '').toLowerCase();
-    var rgb = colors[s];
+    var rgb = data.colors[s];
     return rgb;
 };
 

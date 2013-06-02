@@ -12,9 +12,8 @@ var cache = {
     },
     quirks: {
         getNormalizedWheelDeltaY: function(e) {
-            window.console.log(e);
             var dy = e.wheelDeltaY / 3.0;
-            window.console.log("Normalized delta: " + dy);
+            window.console.log("wheelDeltaY: " + e.wheelDeltaY + "; normalized: " + dy);
             return dy;
         }
     }
