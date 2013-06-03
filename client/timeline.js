@@ -84,9 +84,10 @@ timeline.Event.prototype.getHtml = function(callback) {
     if (string.startsWith(markup, "Timeline of ")) {
         markup = "[[" + markup.substr(12) + "]]";
     }
-    return wiki.parse(markup);
-}
+    return wiki.parse(markup, true);
+};
     
+
 timeline.Event.prototype.fetchData = function(callback) {
     this.needsFetch = false;
     var self = this;
@@ -121,38 +122,62 @@ timeline.Event.prototype.append = function(event) {
 
 
 timeline.Event.prototype.expand = function(expandSelf) {
-    var changed = false;
+    // Expand children as needed.
     for (var i = this.children.length - 1; i >= 0; i--) {
         var child = this.children[i];
         child.expand(true);
+        // Remove erratic children 
         if (child.start > child.end) {
             this.children.splice(i, 1);
             continue;
-        } 
-        
-        var end = i + 1 < this.children.length ? this.children[i+1].start : this.end;
-        var adjust = child;
-        while(adjust.start != adjust.end) {
-            adjust.end = end;
-            if (adjust.children.length === 0) {
-                break;
-            }
-            adjust = adjust.children[adjust.children.length - 1];
         }
+    }
+    
+    // Expand self to fit children if permitted.
+    var count = this.children.length;
+    if (expandSelf) {
+        // Can we determine the span from the name?
         
-        if (expandSelf) {
+        var title = wiki.parse(this.description, false);
+        if (/^\d\d?th century$/.test(title)) {
+            var century = parseInt(title.substr(0, title.indexOf('t')), 10);
+            this.start = (century - 1) * 100;
+            this.end = century * 100;
+        } else if (/^\d\d\d\ds$/.test(title)) {
+            this.start = parseInt(title.substr(0, 4), 10);
+            this.end = this.start + 10;
+        } else if (count > 0) {
+            if (this.children[0].start < this.start) {
+                this.start = this.children[0].start;
+            }
+            if (this.children[count - 1].end > this.end) {
+                this.end = this.children[count - 1].end;
+            }
+        }
+    } 
+};
+
+
+timeline.Event.prototype.normalize = function() {
+    var count = this.children.length;
+    for (var i = 0; i < count; i++) {
+        var child = this.children[i];
+        var end = i < count - 1 ? this.children[i + 1].start : this.end;
+        if (child.start != child.end || child.children.length > 0) {
             if (child.start < this.start) {
-                this.start = child.start;
-                changed = true;
+                child.start = this.start;
             }
-            if (child.end > this.end) {
-                this.end = child.end;
-                changed = true;
-            }
+            child.end = end;
+            child.normalize();
+        }
+    }
+    for (var i = count - 1; i >= 0; i--) {
+        var child = this.children[i];
+        if (child.start < this.start || child.end > this.end) {
+            this.children.splice(i, 1);
         }
     }
 };
-
 
 timeline.Event.prototype.toString = function() {
     return time.toString(this.start) + ' – ' + time.toString(this.end) + ': ' +
@@ -171,7 +196,7 @@ timeline.Event.prototype.parse = function(text) {
     var inSection = !this.section;
     var sectionLevel = 10000;
     for (var i = 0; i < lines.length; i++) {
-        var line = string.trim(lines[i]);
+        var line = lines[i].trim();
         var len = line.length;
         if (len === 0) {
             continue;
@@ -182,10 +207,11 @@ timeline.Event.prototype.parse = function(text) {
             heading++;
         }
         if (heading > 0) {
-            var title = line.substr(heading, len - 2 * heading);
-           
+            var title = line.substr(heading, len - 2 * heading).trim();
+            var parsedTitle = wiki.parse(title, false).trim();
+
             if (this.section) {
-                if (title == this.section) {
+                if (parsedTitle == this.section) {
                     inSection = true;
                     sectionLevel = heading;
                     continue;
@@ -199,9 +225,15 @@ timeline.Event.prototype.parse = function(text) {
                 }
             }
             
-            if (string.endsWith(title, " Eon") || string.endsWith(title, " Era") || 
-                string.endsWith(title, " Period")) {
-                var cut = title.lastIndexOf(' ');
+            // No extra sections for pure numeric titles (1930s, 17th century).
+            if (/\d\d\d\ds/.test(parsedTitle) || /Undated/.test(parsedTitle) ||
+                /centur(y|ies)/.test(parsedTitle)) {
+                continue;
+            }
+            
+            if (/ Eon$/.test(parsedTitle) || / Era$/.test(parsedTitle) || 
+                / Period$/.test(parsedTitle)) {
+                var cut = parsedTitle.lastIndexOf(' ');
                 title = "[[" + title.substr(0, cut) + "]]" + title.substr(cut);
             } else if (title.indexOf('[[') == -1) {
                 title = "[[" + title + "]]";
@@ -220,24 +252,31 @@ timeline.Event.prototype.parse = function(text) {
             if (parts.length <= format[2] || parts.length <= format[3]) {
                 window.console.log('expected more parts in ' + parts);
             } else {
-                var timespan = string.trim(parts[format[2]]);
-                timespan = timespan.split('[[').join();
-                timespan = timespan.split(']]').join();
+                var timespan = parts[format[2]].trim();
+                timespan = wiki.parse(timespan, false);
                 
                 var description = '';
                 for (var j = format[3]; j < parts.length; j++) {
-                    description += ' ' + string.trim(parts[j]);
+                    if (description.length > 0) {
+                        description += format[1] == ':' ? ': ' : ' ';
+                    }
+                    description += string.trim(parts[j]);
                 }
                 
                 if (timespan == '200,000 - 50,000 years ago') {
                     window.console.log('skipping: ' + line);
                 } else {
-                    current.append(new timeline.Event(timespan, string.trim(description)));
+                    var childEvent = new timeline.Event(timespan, timespan + ': ' + string.trim(description));
+                    childEvent.end = childEvent.start; // hack.
+                    if (!isNaN(childEvent.start)) {
+                        current.append(childEvent);
+                    }
                 }
             }
         }
     }
     this.expand(false);
+    this.normalize();
 };
 
 console.log(timeline);

@@ -21,31 +21,33 @@
         #gutter {
             font-size:90%;
             height: 100%;
+            width: 120px;
             overflow: hidden;
             position: relative;
-            background: -webkit-linear-gradient(top, #000, #000, #888, #fff, #fff);
-            color:#ddd;
+            background-color: #ccc;
+            color:#333;
         }
         #gutter .timeStep {
             position: absolute;
             text-align: right;
             width: 100%;
-            pointer-events: none;
         }
-        
         #bottomimage {
             position:absolute;
             bottom:0;
         }
         
+        #timepointer a {
+            text-decoration: none;
+        }
         #timepointer {
+            padding: 5px 0 5px 0;
             width:100%;
             position:relative;
             text-align:right;
             color:white;
             background-color:red;
             z-index:1;
-            pointer-events: none;
         }
         
         #timeline {
@@ -63,7 +65,7 @@
           -webkit-transition: top 0.5s, height 0.5s, left 0.5s, width 0.5s;
         }
         #timeline  .event {
-            border-top:1px solid black;
+            /*border-top:1px solid black;*/
             position: absolute;
             overflow:hidden; 
         }
@@ -72,7 +74,7 @@
             position: absolute;
         }
         #timeline .text {
-            padding: 3px;
+            padding: 4px 4px 4px 24px;
             font-size:90%;
             overflow: hidden;
             position: relative;
@@ -82,6 +84,8 @@
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+            text-indent: -20px;
+            height: 100%;
         }
         #timeline .rot {
             padding: 3px;
@@ -105,21 +109,51 @@
         #wikiFrame {
             height:100%;
             width:100%;
+            display:none;
+        }
+        
+        #meta {
+            height:100%;
+            width:100%;
+            padding:10px;
+        }
+        
+        #imageContainer {
+            border: 1px solid black;
         }
     </style>
 </head>
 <body style="">
     <table cellpadding=0 cellspacing=0 border=0 style="width:100%;height:100%">
         <tr>
-            <td width="200" valign="top">
+            <td width="100">
                 <div id="gutter">
                   <div id="timepointer"></div>
-                  <img id="earthImage"></img>
-                  <img id="bottomImage"></img>
                 </div>
             </td>
-            <td><div id="timeline"></div></td>
-            <td width="30%"><iframe id="wikiFrame" src="help.html"></iframe></td>
+            <td>
+                <div id="timeline"></div>
+            </td>
+            <td width="480">
+                <div id="meta">
+                    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+                        <tr>
+                            <td height=280 align=center id="imageContainer"><img id="earthImage"></img></td>
+                        </tr>
+                    </table>
+                    <blockquote>Those who cannot remember the past are condemned to repeat it</blockquote>
+                    <p align="right"><a href="http://en.m.wikipedia.org/wiki/George_Santayana">George Santayana</a>
+                    <p>Use the mouse wheel to scroll up or down. If the start or end of the time line has been reached, 
+                        this will automatically zoom in. You can also zoom in and out explicitly with the scroll wheel
+                        by holding the shift key or pressing the '+' or '-' key.
+                    <p>Clicking an area will zoom in or out to the corresponding period; 
+                        clicking a link will open the corresponding article in this frame.
+                        Clicking the time scale on the left side will zoom out to the full time line.
+                        Clicking the image will show a larger version in this frame including
+                        the image attribution.
+                </div>
+                <iframe id="wikiFrame"></iframe>
+            </td>
         </tr>
     </table>
     <script src="utils.js"></script>

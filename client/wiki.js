@@ -3,51 +3,80 @@ var wiki = module.exports = exports = {};
 /**
  * Parses wiki text to plain text or html, depnding on the toHtml parameter.
  * 
- * @param {string} s The wikitext to parse.
+ * @param {string} wt The wikitext to parse.
  * @param {boolean} html Whether to parse to html (true) or plain text (false).
  * @return {string} The parsed output.
  */
-wiki.parse = function(s, toHtml) {
-    var pos = 0;
-    while(true) {
-        var cut0 = s.indexOf("[[", pos);
-        if (cut0 == -1) break;
-        var cut1 = s.indexOf("]]", cut1 + 2);
-        if (cut1 == -1) break;
-        var ww = s.substring(cut0 + 2, cut1);
-        var cut2 = ww.indexOf('|', cut0 + 2);
-        var link, label;
-        if (cut2 == -1) {
-            link = label = ww;
-        } else {
-            link = ww.substr(0, cut2);
-            label = ww.substr(cut2+1);
+wiki.parse = function(wt, toHtml) {
+    var pos = 0; // start pos for plain copying from wt.
+    var s = '';
+    var end, cut;
+    var len = wt.length;
+    for (var i = 0; i < len; i++) {
+        var d = (i + 1 < len ? wt.charAt(i + 1) : '');
+        switch(wt.charAt(i)) {
+            case '<':
+                s += wt.substring(pos, i);
+                end = wt.indexOf('>', i + 1);
+                if (end == -1) {
+                    s += toHtml ? "&lt;" : "<";
+                    pos = i + 1;
+                } else {
+                    if (toHtml) {
+                        var tag = wt.substring(i, end);
+                        if (tag == "<sup>" || tag == "</sup>" || tag == "<ref>" || tag == "</ref>") {
+                            s += tag;
+                        }
+                    }
+                    pos = end + 1;
+                }
+                break;
+            case '_': 
+                s += wt.substring(pos, i) + ' ';
+                pos = i + 1;
+                break;
+            case '[':
+                if (d != '[') break;
+                end = wt.indexOf("]]", i + 2);
+                if (end == -1) break;
+                var link = wt.substring(i + 2, end);
+                var label = link;
+                cut = link.indexOf('|');
+                if (cut != -1) {
+                    label = label.substr(cut + 1);
+                    link = link.substr(0, cut);
+                }
+                s += wt.substring(pos, i);
+                if (toHtml) {
+                    s += '<a href="#' + link + '">' + label + "</a>";
+                } else {
+                    s += label;
+                }
+                pos = end + 2;
+                break;
+            case '{':
+                if (d != '{') break;
+                end = wt.indexOf('}}', i + 2);
+                if (end == -1) break;
+                s += wt.substring(pos, i);
+                pos = end + 2;
+                break;
         }
-        if (toHtml) {
-            s = s.substr(0, cut0) + '<a href="#' + link + '">' + label + "</a>" + s.substr(cut1 + 2);
-        } else {
-            s = s.substr(0, cut0) + label + s.substr(cut1 + 2);
-        }
-        pos = cut0;  // conservative
+        if (i < pos) i = pos - 1;
     }
     
-    // use regexp?
-    pos = 0;
-    while(true) {
-        var cut0 = s.indexOf("{{", pos);
-        if (cut0 == -1) break;
-        var cut1 = s.indexOf('}}', cut0 + 2);
-        if (cut1 == -1) break;
-        s = s.substr(0, cut0) + s.substring(cut1 + 2);
-        pos = cut1 - 4;
-    }
+    s += wt.substr(pos);
+    
+    //console.log("Wikitext:  " + wt);
+    //console.log("Converted: " + s);
     
     return s;
 };
 
+wiki.callbackId = 0;
 
 wiki.fetchHtml = function(title, callback) {
-    var callbackName = "globaljsonpcallback";
+    var callbackName = "globaljsonpcallback" + wiki.callbackId++;
     window[callbackName] = function(response) {
         console.log(response);
         callback(response['parse']['text']);
@@ -60,14 +89,19 @@ wiki.fetchHtml = function(title, callback) {
 };
 
 wiki.fetchWikiText = function(title, callback) {
-    var callbackName = "globaljsonpcallback";
+    var callbackName = "globaljsonpcallback" + wiki.callbackId++;
     window[callbackName] = function(response) {
-        console.log(response);
-        var pages = response['query']['pages'];
-        for (var id in pages) {
-            var page = pages[id];
-            callback(page['revisions'][0]['*']);
-        };
+        delete window[callbackName];
+        var pages = response.query && response.query.pages;
+        if (!pages) {
+            console.log('fetchWikiText error; response for "' + title + '"');
+            console.log(response);
+        } else {
+            for (var id in pages) {
+                var page = pages[id];
+                callback(page.revisions[0]['*']);
+            }
+        }
     };
     var url = "http://en.wikipedia.org/w/api.php?action=query&redirects&prop=revisions&rvprop=content&format=json&titles=" +
         encodeURIComponent(title) + "&callback=" + callbackName;

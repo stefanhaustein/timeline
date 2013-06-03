@@ -14,6 +14,8 @@ var LABEL_WIDTH = 150;
 var ROT_LABEL_WIDTH = 24;
 var ZOOM_FACTOR = 1.1;
 
+var showZoom = false;
+
 // TODO: Derive from root.
 var minOffset = -13700000000;
 var timeOffset = minOffset;
@@ -59,7 +61,7 @@ function hsvToRgb(h, s, v) {
         default:
             r = v; g = t; b = p;
     }
-    return "rgb(" + ~~r + "," + ~~g + "," + ~~b + ")";
+    return [~~r,~~g,~~b];
 }
 
 function measureDepth(event) {
@@ -81,9 +83,9 @@ function measureDepth(event) {
     return min;
 }
 
-function render(parentElement, parentY, event, nextStart, collapse, fraction, remainingWidth, viewportHeight) {
+function render(parentElement, parentY, event, overlap, timeLimit, collapse, fraction, remainingWidth, viewportHeight) {
     var y = (event.start - timeOffset) * timeScale;
-    var height = ((event.start == event.end ? nextStart : event.end) - event.start) * timeScale;
+    var height = (event.end - event.start) * timeScale;
     
     if (y < -2 * viewportHeight) {
         var rm = -(y + 2 * viewportHeight);
@@ -94,15 +96,17 @@ function render(parentElement, parentY, event, nextStart, collapse, fraction, re
         height = 4 * viewportHeight;
     } 
     
+    var textOnly = event.start == event.end;
     var top = y - parentY;
     var count = event.children.length;
 
     var element = document.getElementById(event.id);
-    var textTop = y < 0 ? -y : 0; 
+    var textTop = y < 0 ? -y : 0;
 
     var textDiv;
     var containerDiv = null; 
     if (!element) {
+        if (textOnly && overlap) return 0;
         element = document.createElement("div");
         element.setAttribute('id', event.id);
         element.className = event.start == event.end ? 'event' : 'span';
@@ -118,15 +122,17 @@ function render(parentElement, parentY, event, nextStart, collapse, fraction, re
         }
         if (event.start < event.end) {
             var rgb = event.color;
-            if (!rgb && event.parent && event.parent.color) {
-                var prgb = event.parent.color;
-                var f = fraction + 0.5;
-                rgb = [prgb[0]*f, prgb[1]*f, prgb[2]*f];
-                window.console.log(rgb);
+            if (!rgb) {
+                if (event.parent && event.parent.color) {
+                    var prgb = event.parent.color;
+                    var f = fraction * 0.7 + 0.7;
+                    rgb = [prgb[0]*f, prgb[1]*f, prgb[2]*f];
+                } else {
+                    rgb = hsvToRgb(200.0 * fraction, 0.5, 1);
+                    event.color = rgb;
+                }
             }
-            element.style.backgroundColor = rgb ? 
-                'rgb(' + Math.floor(rgb[0])+ "," + Math.floor(rgb[1]) + "," + Math.floor(rgb[2])+')' : 
-                hsvToRgb(360.0 * fraction, 0.5, 1);
+            element.style.backgroundColor = 'rgb(' + Math.floor(rgb[0])+ "," + Math.floor(rgb[1]) + "," + Math.floor(rgb[2])+')';
             element.style.borderColor = element.style.color = (rgb && toGrayscale(rgb) < 48) ? "#ccc" : "#333";
         } 
     } else {
@@ -139,7 +145,6 @@ function render(parentElement, parentY, event, nextStart, collapse, fraction, re
     // TODO(haustein) Avoid this here
     
     element.style.top = top;
-    element.style.height = height;
     element.style.width = remainingWidth;
    
     if (count) {
@@ -168,15 +173,30 @@ function render(parentElement, parentY, event, nextStart, collapse, fraction, re
                 "position:absolute;left:"+lw+"px;top:0;height:"+height+";width:"+ remainingWidth + "px");
         } 
     } 
+    
+    if (textOnly) {
+        if (overlap) {
+            parentElement.removeChild(element);
+            return 0;
+        }
+        element.style.display = "block";
+        height = textDiv.offsetHeight;
+        if (timeToY(event.start) + height > timeToY(timeLimit)) {
+            element.style.display = "none";
+            return 0;
+        } 
+    } else {
+        element.style.height = height;
+        textDiv.style.display = height >= 20 ? "block": "none";
+    }
 
-    textDiv.style.display = height >= 20 ? "block": "none";
 
-    if (remainingWidth < LABEL_WIDTH || height < 8 || 
-            y + height < -viewportHeight || y > 2 * viewportHeight) {
+    if (remainingWidth < LABEL_WIDTH || height < 50 || 
+            y + height/2 < -viewportHeight || y > 1.5 * viewportHeight) {
         if (containerDiv) {
             containerDiv.innerHTML = "";
         }
-        return;
+        return height;
     }
     
     if (event.needsFetch) {
@@ -186,12 +206,30 @@ function render(parentElement, parentY, event, nextStart, collapse, fraction, re
         });
     }
     
-    for (var i = 0; i < event.children.length; i++) {
+    var filledTo = 0;
+    var childTimeLimit = event.start;
+    for (var i = 0; i < count; i++) {
         var child = event.children[i];
-        var cf = ((child.start + child.end) / 2 - event.start) / (event.end - event.start);
-        var childNextStart = i < count - 1 ? event.children[i+1].start : event.end;
-        render(containerDiv, y, event.children[i], childNextStart, collapse - 1, cf, remainingWidth, viewportHeight);
+
+        if (childTimeLimit <= child.start) {
+            childTimeLimit = event.end;
+            for (var j = i + 1; j < count; j++) {
+                var childJ = event.children[j];
+                if (childJ.start != childJ.end) {
+                    childTimeLimit = Math.min(childJ.start, childTimeLimit);
+                    break;
+                }
+            }
+        }
+
+        var childOverlap = filledTo > timeToY(child.start);
+
+        var childHeight = render(containerDiv, y, event.children[i], childOverlap, childTimeLimit, collapse - 1, i / (count + 1), remainingWidth, viewportHeight);
+        if (!childOverlap && childHeight != 0) {
+            filledTo = timeToY(child.start) + childHeight;
+        }
     }
+    return height;
 }
 
 
@@ -217,23 +255,32 @@ function update(smooth) {
     
     updateTimePointer();
     
-    render(timelineElement, 0, naturalHistory, 0, measureDepth(naturalHistory), 0.5, w, h);
+    render(timelineElement, 0, naturalHistory, false, 0, measureDepth(naturalHistory), 0.5, w, h);
 }
-
 
 function updateTimePointer() {
     timePointer.style.top = lastMouseY - timePointer.offsetHeight / 2;
     var t = yToTime(lastMouseY);
-    timePointer.innerHTML = time.toString(t) + " –";
+    
+    timePointer.innerHTML = (showZoom ? "|<a href='#reset'>&nbsp;&times;&nbsp;</a>|<a href='#zoomOut'>&nbsp;&minus;&nbsp;</a>|<a href='#zoomIn'>&nbsp;&plus;&nbsp;</a>|" : time.toString(t)) + " —";
     
     // use binary search!
     var index = 0;
     while (index+1 < data.GLOBES.length && data.GLOBES[index+1][0] < t) {
         index++;
     }
-    var imgName = data.GLOBES[index][1];
+    var globe = data.GLOBES[index];
+    var imgName = globe[1];
+
+    document.getElementById("imageContainer").style.backgroundColor = globe[2] ? "black" : "white";
+
+    var width = 420;
+    if (globe[3]){
+        width *= globe[3];
+    }
     var cut = imgName.lastIndexOf('/');
-    earthImage.src="http://upload.wikimedia.org/wikipedia/commons/thumb/" + imgName + "/200px-" + imgName.substr(cut + 1);
+//    earthImage.width = "" + Math.floor(width);
+    earthImage.src="http://upload.wikimedia.org/wikipedia/commons/thumb/" + imgName + "/" + width + "px-" + imgName.substr(cut + 1);
     earthImage.setAttribute('href', '#File:' + imgName.substr(cut + 1));
 }
 
@@ -244,13 +291,45 @@ function updateTimePointer() {
 timelineElement.addEventListener("mousewheel", onMouseWheel, false);
 gutterElement.addEventListener("mousewheel", onMouseWheel, false);
 
-gutterElement.onclick = timelineElement.onclick = function(event) {
+
+function zoomTo(e) {
+    timeOffset = e.start;
+    timeScale = timelineElement.offsetHeight / (e.end - e.start);
+}
+
+gutterElement.onclick = function(event) {
     var element = event.target;
     lastMouseY = event.clientY;
+
+    if (element) {
+        console.log(event);
+        var href = element.getAttribute('href')
+        if (href=='#zoomIn') {
+            zoom(event.clientY, 1.3);
+            update(true);
+        } else if (href=='#zoomOut') {
+            zoom(event.clientY, 1/1.3);
+            update(true);
+        } else if (href=='#reset') {
+            zoomTo(naturalHistory);
+            update(true);
+        }
+    }
+}
+
+
+timelineElement.onclick = function(event) {
+    var element = event.target;
+    
+    lastMouseY = event.clientY;
     while (element) {
+        
+        
         var href = element.getAttribute("href");
         var e = element['_event_'];
         if (href) {
+            wikiFrame.style.display = "block";
+            document.getElementById("meta").style.display = "none";
             wikiFrame.src = "http://en.m.wikipedia.org/wiki/"+ href.substr(1);  
             event.preventDefault();
             break;
@@ -258,9 +337,10 @@ gutterElement.onclick = timelineElement.onclick = function(event) {
             while (e.end == e.start) {
                 e = e.parent;
             }
-            timeOffset = e.start;
-            timeScale = timelineElement.offsetHeight / (e.end - e.start);
+            zoomTo(e);
             update(true);
+            wikiFrame.style.display = "none";
+            document.getElementById("meta").style.display = "block";
             event.preventDefault();
             break;
         }
@@ -325,6 +405,7 @@ function onMouseWheel(e) {
 
 document.onmousemove = function(event) {
     lastMouseY = event.clientY;
+    showZoom = event.clientX < gutterElement.offsetWidth;
     updateTimePointer();
 };
 

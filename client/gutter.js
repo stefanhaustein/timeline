@@ -18,7 +18,7 @@ gutter.Gutter.prototype.update = function(timeOffset, timeScale) {
     var idealTimeStep = idealStep / timeScale;
         
     var digits = Math.round(Math.log(idealTimeStep) / Math.log(10));
-    var timeStep = Math.pow(10, digits);
+    var timeStep = Math.max(Math.pow(10, digits), 1);
     var pixelStep = timeStep * timeScale;
     
     // start two steps up.
@@ -63,8 +63,6 @@ gutter.Gutter.prototype.update = function(timeOffset, timeScale) {
         }
         child.innerHTML = label;
         var y = Math.round((t - timeOffset) * timeScale);
-        
-        child.style.color = (y > viewportHeight / 2) ? '#333' : '#ddd'
         
         child.style.top = y - child.offsetHeight / 2;
         child['_epoch_'] = this.epoch;
