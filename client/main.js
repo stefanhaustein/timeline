@@ -6,6 +6,7 @@ var quirks = require('quirks');
 var gutterPackage = require('gutter');
 var gutterElement = document.getElementById('gutter');
 var gutter = new gutterPackage.Gutter(gutterElement);
+var view = require('view');
 
 var timelineElement = document.getElementById('timeline');
 var wikiFrame = document.getElementById('wikiFrame');
@@ -16,29 +17,21 @@ var ZOOM_FACTOR = 1.1;
 
 var showZoom = false;
 
-// TODO: Derive from root.
-var minOffset = -13700000000;
-var timeOffset = minOffset;
-var minScale = timelineElement.offsetHeight / (-minOffset + 2013);
-var timeScale = minScale;
 var timePointer = document.getElementById("timepointer");
-
 var earthImage = document.getElementById('earthImage');
 
-var naturalHistory = new timeline.Event(
-    data.TIMELINES[0], data.TIMELINES[1], data.TIMELINES[2], data.TIMELINES[3], data.TIMELINES[4]);
+var rootEvent = new timeline.Event(
+    data.TIMELINES[0], data.TIMELINES[1], 
+    data.TIMELINES[2], data.TIMELINES[3], data.TIMELINES[4]);
+
+var viewState = new view.State(timelineElement.offsetHeight, rootEvent);
+
 var lastMouseY = timelineElement.offsetHeight / 2;
 
-gutterElement['_event_'] = naturalHistory;
+
+gutterElement['_event_'] = rootEvent;
 
 
-function timeToY(t) {
-    return (t - timeOffset) * timeScale;
-}
-
-function yToTime(y) {
-    return y / timeScale + timeOffset;
-}
 
 function toGrayscale(rgb) {
     return 0.21 * rgb[0] + 0.71 * rgb[1] + 0.07* rgb[2];
@@ -69,8 +62,8 @@ function measureDepth(event) {
     var min = 1000;
     for (var i = 0; i < event.children.length; i++) {
         var child = event.children[i];
-        var start = timeToY(child.start);
-        var end = timeToY(child.end);
+        var start = viewState.timeToY(child.start);
+        var end = viewState.timeToY(child.end);
         if (end < -h/2 || start > 1.5 * h || start == end) continue;
         if (end - start < h / 3) {
             return 0;
@@ -84,8 +77,8 @@ function measureDepth(event) {
 }
 
 function render(parentElement, parentY, event, overlap, timeLimit, collapse, fraction, remainingWidth, viewportHeight) {
-    var y = (event.start - timeOffset) * timeScale;
-    var height = (event.end - event.start) * timeScale;
+    var y = viewState.timeToY(event.start);
+    var height = (event.end - event.start) * viewState.scale;
     
     if (y < -2 * viewportHeight) {
         var rm = -(y + 2 * viewportHeight);
@@ -132,10 +125,13 @@ function render(parentElement, parentY, event, overlap, timeLimit, collapse, fra
                     event.color = rgb;
                 }
             }
-            element.style.backgroundColor = 'rgb(' + Math.floor(rgb[0])+ "," + Math.floor(rgb[1]) + "," + Math.floor(rgb[2])+')';
-            element.style.borderColor = element.style.color = (rgb && toGrayscale(rgb) < 48) ? "#ccc" : "#333";
+            element.style.backgroundColor = 
+                'rgb(' + Math.floor(rgb[0])+ "," + Math.floor(rgb[1]) + "," + Math.floor(rgb[2])+')';
+            element.style.borderColor = element.style.color = 
+                (rgb && toGrayscale(rgb) < 48) ? "#ccc" : "#333";
         } 
     } else {
+        element.classList.add('animated');
         textDiv = element.firstChild;
         if (count !== 0) {
             containerDiv = textDiv.nextSibling;
@@ -181,7 +177,7 @@ function render(parentElement, parentY, event, overlap, timeLimit, collapse, fra
         }
         element.style.display = "block";
         height = textDiv.offsetHeight;
-        if (timeToY(event.start) + height > timeToY(timeLimit)) {
+        if (viewState.timeToY(event.start) + height > viewState.timeToY(timeLimit)) {
             element.style.display = "none";
             return 0;
         } 
@@ -222,47 +218,69 @@ function render(parentElement, parentY, event, overlap, timeLimit, collapse, fra
             }
         }
 
-        var childOverlap = filledTo > timeToY(child.start);
+        var childOverlap = filledTo > viewState.timeToY(child.start);
 
-        var childHeight = render(containerDiv, y, event.children[i], childOverlap, childTimeLimit, collapse - 1, i / (count + 1), remainingWidth, viewportHeight);
+        var childHeight = render(
+            containerDiv, y, event.children[i], childOverlap, childTimeLimit, 
+            collapse - 1, i / (count + 1),  remainingWidth, viewportHeight);
         if (!childOverlap && childHeight != 0) {
-            filledTo = timeToY(child.start) + childHeight;
+            filledTo = viewState.timeToY(child.start) + childHeight;
         }
     }
     return height;
 }
 
 
-function update(smooth) {
-    timelineElement.className = smooth ? "smooth" : "";
+function fixBounds() {
+    var minScale = (viewState.viewportHeight-2*view.BORDER) / (rootEvent.end - rootEvent.start);
+    if (viewState.scale < minScale) {
+        viewState.scale = minScale;
+    }
+    if (viewState.timeOffset < rootEvent.start) {
+        viewState.timeOffset = rootEvent.start;
+    }
+    if (viewState.yToTime(viewState.viewportHeight-view.BORDER) > rootEvent.end) {
+        viewState.timeOffset -= viewState.yToTime(viewState.viewportHeight-view.BORDER) - rootEvent.end;
+    }
+}
 
-    if (timeScale < minScale) {
-        timeScale = minScale;
+var resetTimer;
+
+function update(smooth) {
+    if (resetTimer) {
+        window.clearTimeout(resetTimer);
     }
-    if (timeOffset < minOffset) {
-        timeOffset = minOffset;
+    if (viewState.scale < (viewState.viewportHeight - 2*view.BORDER) / (rootEvent.end - rootEvent.start)) {
+        resetTimer = window.setTimeout(function() {
+            fixBounds();
+            resetTimer = null;
+            update(true);
+        }, 100);
+    } else {
+        fixBounds();
     }
-    var tbottom = yToTime(timelineElement.offsetHeight);
-    if (tbottom > 2013) {
-        timeOffset -= tbottom-2013;
-    }
+    
+    gutterElement.className = timelineElement.className = smooth ? "smooth" : "";
 
     var w = timelineElement.offsetWidth;
     var h = timelineElement.offsetHeight;
     timelineElement.style.height = h + "px";
     
-    gutter.update(timeOffset, timeScale);
+    gutter.update(viewState);
     
     updateTimePointer();
     
-    render(timelineElement, 0, naturalHistory, false, 0, measureDepth(naturalHistory), 0.5, w, h);
+    render(timelineElement, 0, rootEvent, false, 0, measureDepth(rootEvent), 0.5, w, h);
 }
 
 function updateTimePointer() {
     timePointer.style.top = lastMouseY - timePointer.offsetHeight / 2;
-    var t = yToTime(lastMouseY);
+    var t = viewState.yToTime(lastMouseY);
     
-    timePointer.innerHTML = (showZoom ? "|<a href='#reset'>&nbsp;&times;&nbsp;</a>|<a href='#zoomOut'>&nbsp;&minus;&nbsp;</a>|<a href='#zoomIn'>&nbsp;&plus;&nbsp;</a>|" : time.toString(t)) + " —";
+    timePointer.innerHTML = (showZoom ? 
+        '|<a href="#reset">&nbsp;&times;&nbsp;</a>' + 
+        '|<a href="#zoomOut">&nbsp;&minus;&nbsp;</a>' + 
+        '|<a href="#zoomIn">&nbsp;&plus;&nbsp;</a>|' : time.toString(t)) + " —";
     
     // use binary search!
     var index = 0;
@@ -280,7 +298,8 @@ function updateTimePointer() {
     }
     var cut = imgName.lastIndexOf('/');
 //    earthImage.width = "" + Math.floor(width);
-    earthImage.src="http://upload.wikimedia.org/wikipedia/commons/thumb/" + imgName + "/" + width + "px-" + imgName.substr(cut + 1);
+    earthImage.src="http://upload.wikimedia.org/wikipedia/commons/thumb/" + 
+        imgName + "/" + width + "px-" + imgName.substr(cut + 1);
     earthImage.setAttribute('href', '#File:' + imgName.substr(cut + 1));
 }
 
@@ -292,27 +311,25 @@ timelineElement.addEventListener("mousewheel", onMouseWheel, false);
 gutterElement.addEventListener("mousewheel", onMouseWheel, false);
 
 
-function zoomTo(e) {
-    timeOffset = e.start;
-    timeScale = timelineElement.offsetHeight / (e.end - e.start);
-}
-
 gutterElement.onclick = function(event) {
     var element = event.target;
     lastMouseY = event.clientY;
 
     if (element) {
-        console.log(event);
         var href = element.getAttribute('href')
         if (href=='#zoomIn') {
-            zoom(event.clientY, 1.3);
+            viewState.zoom(event.clientY, 1.3);
             update(true);
+            event.preventDefault();
         } else if (href=='#zoomOut') {
-            zoom(event.clientY, 1/1.3);
+            viewState.zoom(event.clientY, 1/1.3);
             update(true);
+            event.preventDefault();
         } else if (href=='#reset') {
-            zoomTo(naturalHistory);
+            viewState.zoomTo(rootEvent);
+            viewState.zoom(viewState.viewportHeight/2, 1/1.1);
             update(true);
+            event.preventDefault();
         }
     }
 }
@@ -337,7 +354,7 @@ timelineElement.onclick = function(event) {
             while (e.end == e.start) {
                 e = e.parent;
             }
-            zoomTo(e);
+            viewState.zoomTo(e);
             update(true);
             wikiFrame.style.display = "none";
             document.getElementById("meta").style.display = "block";
@@ -349,21 +366,14 @@ timelineElement.onclick = function(event) {
 };
 
 
-function zoom(y, factor) {
-    timeOffset = yToTime(y);
-    timeScale *= factor;
-    timeOffset += yToTime(0) - yToTime(y);
-}
-
-
 function move(y, delta) {
-    console.log("bottom time: " + yToTime(timelineElement.offsetHeight));
-    if (delta < 0 && timeOffset <= minOffset) {
-        zoom(0, 1.1);
-    } else if (delta > 0 && yToTime(timelineElement.offsetHeight + 1) > 2013) {
-        zoom(timelineElement.offsetHeight, 1.1);
+    console.log("bottom time: " + viewState.yToTime(timelineElement.offsetHeight));
+    if (delta < 0 && viewState.timeOffset <= rootEvent.start) {
+        viewState.zoom(view.BORDER, 1.1);
+    } else if (delta > 0 && viewState.yToTime(viewState.viewportHeight - view.BORDER) >= rootEvent.end) {
+        viewState.zoom(viewState.viewportHeight - view.BORDER, 1.1);
     } else {
-        timeOffset += delta / timeScale;
+        viewState.timeOffset += delta / viewState.scale;
     }
 }
 
@@ -372,7 +382,7 @@ window.onresize = function(e) {
     console.log(e);
     lastMouseY = e.clientY;
     timelineElement.style.height = window.innerHeight;
-    minScale = window.innerHeight / -minOffset;
+    viewState.setViewportHeight(window.innerHeight);
     update();
 };
 
@@ -392,9 +402,9 @@ function onMouseWheel(e) {
             delta = e.wheelDeltaX;
         }
         if (delta < 0) {
-            zoom(lastMouseY, ZOOM_FACTOR);
+            viewState.zoom(lastMouseY, ZOOM_FACTOR);
         } else if (delta > 0) {
-            zoom(lastMouseY, 1/ZOOM_FACTOR);
+            viewState.zoom(lastMouseY, 1/ZOOM_FACTOR);
         }
     } else {
         move(lastMouseY, delta);
@@ -415,9 +425,9 @@ document.onkeydown = function(event) {
     var char = event.which == null ? event.keyCode : event.which;
     var y = timelineElement.offsetHeight / 2;
     if (char === 187) {
-        zoom(y, ZOOM_FACTOR);
+        viewState.zoom(y, ZOOM_FACTOR);
     } else if (char === 189) {
-        zoom(y, 1/ZOOM_FACTOR);
+        viewState.zoom(y, 1/ZOOM_FACTOR);
     } else if (char === 38) {
         move(y, 10);
     } else if (char === 40) {
@@ -434,18 +444,4 @@ update();
 // startup
 
 
-
-
-
-
-
-/*    
-var req = new XMLHttpRequest();
-req.onload = function() {
-    naturalHistory.parse(this.responseText);
-    update(0);
-};
-req.open('get', 'wikipedia_natural_history.txt');
-req.send();
-*/
 

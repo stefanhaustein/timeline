@@ -10,19 +10,19 @@ gutter.Gutter = function(element) {
 };
 
 
-gutter.Gutter.prototype.update = function(timeOffset, timeScale) {
+gutter.Gutter.prototype.update = function(viewState) {
     var viewportHeight = this.element.offsetHeight;
 
-    var idealStepCount = viewportHeight / 50;    
+    var idealStepCount = viewportHeight / 100;    
     var idealStep = viewportHeight / idealStepCount;
-    var idealTimeStep = idealStep / timeScale;
+    var idealTimeStep = idealStep / viewState.scale;
         
     var digits = Math.round(Math.log(idealTimeStep) / Math.log(10));
     var timeStep = Math.max(Math.pow(10, digits), 1);
-    var pixelStep = timeStep * timeScale;
+    var pixelStep = timeStep * viewState.scale;
     
     // start two steps up.
-    var t = (Math.round(timeOffset / timeStep) - 2) * timeStep;
+    var t = (Math.round(viewState.timeOffset / timeStep) - 2) * timeStep;
     var test1 = time.parse(time.toString(t));
     var test2 = time.parse(time.toString(t + timeStep));
     var useKey = Math.abs(test1 - t) > timeStep / 10 || 
@@ -49,6 +49,8 @@ gutter.Gutter.prototype.update = function(timeOffset, timeScale) {
             child.className = 'timeStep';
             this.element.appendChild(child);
             this.elements[key] = child;
+        } else {
+            child.classList.add('animated');
         }
         var label;
         switch(subStep * (4/subDivision) % 4) {
@@ -62,7 +64,7 @@ gutter.Gutter.prototype.update = function(timeOffset, timeScale) {
                 label = "-";
         }
         child.innerHTML = label;
-        var y = Math.round((t - timeOffset) * timeScale);
+        var y = Math.round(viewState.timeToY(t));
         
         child.style.top = y - child.offsetHeight / 2;
         child['_epoch_'] = this.epoch;

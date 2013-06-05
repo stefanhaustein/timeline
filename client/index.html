@@ -19,13 +19,15 @@
         }
         
         #gutter {
+            background: linear-gradient( #666, #fff);
+            border-right: 1px solid black;
             font-size:90%;
             height: 100%;
             width: 120px;
             overflow: hidden;
             position: relative;
-            background-color: #ccc;
-            color:#333;
+            /*background-color: #ccc;*/
+            color:#000;
         }
         #gutter .timeStep {
             position: absolute;
@@ -51,16 +53,20 @@
         }
         
         #timeline {
+            background: linear-gradient( #666, #fff); /*
+            background-color: #333;
+            background-image:url('tile.gif'); */
+            background-repeat:repeat;
             height: 100%;
             position: relative;
             overflow: hidden;
         }
-        #timeline div {
+        #timeline .animated {
             transition: left 0.5s;
             -webkit-transition: left 0.5s;
             
         }
-        #timeline.smooth div {
+        #timeline.smooth .animated, #gutter.smooth .animated {
           transition: top 0.5s, height 0.5s, left 0.5s, width 0.5s;
           -webkit-transition: top 0.5s, height 0.5s, left 0.5s, width 0.5s;
         }
@@ -158,7 +164,7 @@
     </table>
     <script src="utils.js"></script>
     <script>
-        load(['time', 'data', 'wiki', 'timeline', 'gutter', 'main']);
+        load(['time', 'data', 'wiki', 'timeline', 'gutter', 'view', 'main']);
     </script>
 </body>
 </html>
