@@ -1,14 +1,14 @@
 var view = module.exports = exports = {};
 
 
-view.BORDER = 8;
-
 /**
  * @constructor
  */
-view.State = function(viewportHeight, range) {
+view.State = function(viewportHeight, border, range) {
     /** @type{number} */
     this.viewportHeight = viewportHeight;
+
+    this.border = border;
 
     /** @type{number} */
     this.timeOffset = 0;
@@ -25,7 +25,7 @@ view.State = function(viewportHeight, range) {
  * @return {number} .
  */
 view.State.prototype.timeToY = function(t) {
-    return (t - this.timeOffset) * this.scale + view.BORDER;
+    return (t - this.timeOffset) * this.scale + this.border;
 };
 
 /**
@@ -34,19 +34,19 @@ view.State.prototype.timeToY = function(t) {
  * @return {number} .
  */
 view.State.prototype.yToTime = function(y) {
-    return (y - view.BORDER) / this.scale + this.timeOffset;
+    return (y - this.border) / this.scale + this.timeOffset;
 };
 
 view.State.prototype.zoomTo = function(timeSpan) {
     this.timeOffset = timeSpan.start;
-    this.scale = (this.viewportHeight - 2 * view.BORDER) / (timeSpan.end - timeSpan.start);
+    this.scale = (this.viewportHeight - 2 * this.border) / (timeSpan.end - timeSpan.start);
 };
 
 
 view.State.prototype.zoom = function(y, factor) {
     this.timeOffset = this.yToTime(y);
     this.scale *= factor;
-    this.timeOffset += this.yToTime(view.BORDER) - this.yToTime(y);
+    this.timeOffset += this.yToTime(this.border) - this.yToTime(y);
 };
 
 
@@ -78,8 +78,8 @@ view.Gutter.prototype.update = function(viewState) {
     
     // start two steps up.
     var t = (Math.round(viewState.timeOffset / timeStep) - 2) * timeStep;
-    var test1 = time.parse(time.toString(t));
-    var test2 = time.parse(time.toString(t + timeStep));
+    var test1 = model.parseTime(model.timeToString(t));
+    var test2 = model.parseTime(model.timeToString(t + timeStep));
     var useKey = Math.abs(test1 - t) > timeStep / 10 || 
         Math.abs(test2 - (t + timeStep)) > timeStep;
     
@@ -110,7 +110,7 @@ view.Gutter.prototype.update = function(viewState) {
         var label;
         switch(subStep * (4/subDivision) % 4) {
             case 0: 
-                label = (useKey ? key : time.toString(t)) + " —";
+                label = (useKey ? key : model.timeToString(t)) + " —";
                 break;
             case 2:
                 label = halfDash;

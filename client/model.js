@@ -1,5 +1,4 @@
-var timeline = module.exports = exports = {};
-var time = require('time');
+var model = module.exports = exports = {};
 var string = require('string');
 var data = require('data');
 var wiki = require('wiki');
@@ -7,9 +6,106 @@ var wiki = require('wiki');
 /** 
  * @type {number}
  */
-timeline.nextId = 0;
+model.nextId = 0;
 
-timeline.getColor = function(name) {
+/**
+ * Parses the given time to a number.
+ * @param {string} s
+ */
+model.parseTime = function(s) {
+    s = string.trim(s).replace(',', '');
+    var original = s;
+    if (string.startsWith(s, 'c.')) {
+        s = string.trim(s.substr(2));
+    }
+    
+    var cut = s.indexOf(' ');
+    var unit = '';
+    if (cut != -1) {
+        unit = s.substr(cut + 1);
+        s = s.substr(0, cut);
+    }
+    
+    cut = s.indexOf('±');
+    if (cut != -1) {
+        s = s.substr(0, cut);
+    }
+    if (string.endsWith(s, 's')) {
+        s = s.substr(0, s.length - 1);
+    }
+    
+    var result = parseFloat(s);
+    
+    if (string.startsWith(unit, "Ma") ||
+        string.startsWith(unit, "million years ago")) {
+        result = 2013 - 1000000.0 * result;
+    } else if (string.startsWith(unit, "years ago")) {
+        result = 2013 - result;
+    } else if (unit == 'BC' || unit == 'BCE') {
+        result = -(result - 1);
+    }
+
+    if (isNaN(result)) {
+        window.console.log("Not a number for '" + original + '"; unit: ' + unit);
+    }
+
+    return result;
+};
+
+/**
+ * Converts the given time to a string.
+ * @param {number} time
+ */
+model.timeToString = function(time) {
+    if (time < -100000) {
+        return "" + ((time-2013) / -1000000.0).toFixed(2) + " Ma";
+    } 
+    return "" + time.toFixed(0);
+};
+
+model.DASHES = ['–', '-', '—', ' to ', '&mdash;']
+
+/** 
+ * Parses a time interval to the start and end properties of the given
+ * target object.
+ * 
+ * @param {string} s
+ * @param {{start: number, end: number}} target
+ */
+model.parseInterval = function(s, target) {
+    
+    var dash;
+    var cut = -1;
+    for (var i = 0; i < model.DASHES.length; i++) {
+        dash = model.DASHES[i];
+        cut = s.indexOf(dash);
+        if (cut != -1) break;
+    }
+    
+    if (cut == -1) {
+        target.start = target.end = model.parseTime(s);
+        return;
+    }
+    
+    var s0 = string.trim(s.substr(0, cut));
+    var s1 = string.trim(s.substr(cut + dash.length));
+    
+    // Copy the unit to the first time if only the second has one
+    if (s0.length > 0 && s0.charAt(s0.length - 1) >= '0' && s0.charAt(s0.length - 1) <= '9') {
+        var cut1 = s1.length - 1;
+        while (cut1 > 0 && (s1.charAt(cut1) < '0' || s1.charAt(cut1) > '9')) {
+            cut1--;
+        }
+        s0 = s0 + s1.substr(cut1 + 1);
+    }
+    
+    target.start = model.parseTime(s0);
+    target.end = model.parseTime(s1);
+};
+
+
+
+model.getColor = function(name) {
     var s = string.trim(name);
     var cut = name.indexOf(']]');
     if (cut != -1) {
@@ -25,8 +121,8 @@ timeline.getColor = function(name) {
  * @param {string} timespan The unparsed time span of the event
  * @param {description} The description of the event
  */
-timeline.Event = function(timespan, description, opt_format, opt_section, opt_fetchChildren) {
-    /** @type {timeline.Event} */
+model.Event = function(timespan, description, opt_format, opt_section, opt_fetchChildren) {
+    /** @type {model.Event} */
     this.parent = null;
 
     /** @type {number} */
@@ -38,14 +134,14 @@ timeline.Event = function(timespan, description, opt_format, opt_section, opt_fe
     /** @type {string} */
     this.description = description;
     
-    /** @type {array.<timeline.Event>} */
+    /** @type {array.<model.Event>} */
     this.children = [];
  
     /** @type {number} */
-    this.id = "evt" + (timeline.nextId++);
+    this.id = "evt" + (model.nextId++);
   
     /** @type {string} */
-    this.color = timeline.getColor(description);
+    this.color = model.getColor(description);
 
     /** @type {Array} */
     this.format = opt_format;
@@ -58,7 +154,7 @@ timeline.Event = function(timespan, description, opt_format, opt_section, opt_fe
     this.fetchChildren = opt_fetchChildren;
 
     if (timespan) {
-        time.parseInterval(timespan, this);
+        model.parseInterval(timespan, this);
     }
     
     if (!this.needsFetch) {
@@ -67,19 +163,19 @@ timeline.Event = function(timespan, description, opt_format, opt_section, opt_fe
 };
     
     
-timeline.Event.prototype.insertFetchableChildren = function() {
+model.Event.prototype.insertFetchableChildren = function() {
     if (this.fetchChildren) {
         for (var i = 0; i < this.fetchChildren.length; i++) {
             var data = this.fetchChildren[i]; 
             //                             time     desc     format   section children
-            var child = new timeline.Event(data[0], data[1], data[2], data[3], data[4]);
+            var child = new model.Event(data[0], data[1], data[2], data[3], data[4]);
             this.insert(child);
         }
     }
 };
     
     
-timeline.Event.prototype.getHtml = function(callback) {
+model.Event.prototype.getHtml = function(callback) {
     var markup = this.description;
     if (string.startsWith(markup, "Timeline of ")) {
         markup = "[[" + markup.substr(12) + "]]";
@@ -88,7 +184,7 @@ timeline.Event.prototype.getHtml = function(callback) {
 };
     
 
-timeline.Event.prototype.fetchData = function(callback) {
+model.Event.prototype.fetchData = function(callback) {
     this.needsFetch = false;
     var self = this;
     wiki.fetchWikiText(this.description, function(text) {
@@ -102,9 +198,9 @@ timeline.Event.prototype.fetchData = function(callback) {
 
     
 /**
- * @param {timeline.Event} event
+ * @param {model.Event} event
  */
-timeline.Event.prototype.insert = function(event) {
+model.Event.prototype.insert = function(event) {
     for (var i = 0; i < this.children.length; i++) {
         var child = this.children[i];
         if (child.start <= event.start && child.end >= event.end) {
@@ -115,13 +211,13 @@ timeline.Event.prototype.insert = function(event) {
     this.append(event);
 };
 
-timeline.Event.prototype.append = function(event) {
+model.Event.prototype.append = function(event) {
     this.children.push(event);
     event.parent = this;
 };
 
 
-timeline.Event.prototype.expand = function(expandSelf) {
+model.Event.prototype.expand = function(expandSelf) {
     // Expand children as needed.
     for (var i = this.children.length - 1; i >= 0; i--) {
         var child = this.children[i];
@@ -158,7 +254,7 @@ timeline.Event.prototype.expand = function(expandSelf) {
 };
 
 
-timeline.Event.prototype.normalize = function() {
+model.Event.prototype.normalize = function() {
     var count = this.children.length;
     for (var i = 0; i < count; i++) {
         var child = this.children[i];
@@ -179,8 +275,8 @@ timeline.Event.prototype.normalize = function() {
     }
 };
 
-timeline.Event.prototype.toString = function() {
-    return time.toString(this.start) + ' – ' + time.toString(this.end) + ': ' +
+model.Event.prototype.toString = function() {
+    return model.timeToString(this.start) + ' – ' + model.timeToString(this.end) + ': ' +
         this.description;
 };
 
@@ -188,7 +284,7 @@ timeline.Event.prototype.toString = function() {
  * Parses sub events into the given event.
  * @param {string} text
  */
-timeline.Event.prototype.parse = function(text) {
+model.Event.prototype.parse = function(text) {
     var lines = text.split('\n');
     var stack = [this];
     var current = this;
@@ -238,7 +334,7 @@ timeline.Event.prototype.parse = function(text) {
             } else if (title.indexOf('[[') == -1) {
                 title = "[[" + title + "]]";
             }
-            current = new timeline.Event(null, title);
+            current = new model.Event(null, title);
             var parent = heading - 1;
             while (!stack[parent]) {
                 console.log("level " + parent + " missing for heading: " + line);
@@ -266,7 +362,7 @@ timeline.Event.prototype.parse = function(text) {
                 if (timespan == '200,000 - 50,000 years ago') {
                     window.console.log('skipping: ' + line);
                 } else {
-                    var childEvent = new timeline.Event(timespan, timespan + ': ' + string.trim(description));
+                    var childEvent = new model.Event(timespan, timespan + ': ' + string.trim(description));
                     childEvent.end = childEvent.start; // hack.
                     if (!isNaN(childEvent.start)) {
                         current.append(childEvent);
@@ -279,5 +375,5 @@ timeline.Event.prototype.parse = function(text) {
     this.normalize();
 };
 
-console.log(timeline);
+console.log(model);
 

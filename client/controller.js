@@ -1,6 +1,5 @@
-var timeline = require('timeline');
+var model = require('model');
 var string = require('string');
-var time = require('time');
 var data = require('data');
 var quirks = require('quirks');
 var gutter = new view.Gutter(document.getElementById('gutter'));
@@ -12,17 +11,18 @@ var wikiFrame = document.getElementById('wikiFrame');
 var LABEL_WIDTH = 150;
 var ROT_LABEL_WIDTH = 24;
 var ZOOM_FACTOR = 1.1;
+var BORDER = 10;
 
 var showZoom = false;
 
 var timePointer = document.getElementById("timepointer");
 var earthImage = document.getElementById('earthImage');
 
-var rootEvent = new timeline.Event(
+var rootEvent = new model.Event(
     data.TIMELINES[0], data.TIMELINES[1], 
     data.TIMELINES[2], data.TIMELINES[3], data.TIMELINES[4]);
 
-var viewState = new view.State(timelineElement.offsetHeight, rootEvent);
+var viewState = new view.State(timelineElement.offsetHeight, BORDER, rootEvent);
 
 var lastMouseY = timelineElement.offsetHeight / 2;
 
@@ -226,15 +226,15 @@ function render(parentElement, parentY, event, overlap, timeLimit, collapse, fra
 
 
 function fixBounds() {
-    var minScale = (viewState.viewportHeight-2*view.BORDER) / (rootEvent.end - rootEvent.start);
+    var minScale = (viewState.viewportHeight - 2 * BORDER) / (rootEvent.end - rootEvent.start);
     if (viewState.scale < minScale) {
         viewState.scale = minScale;
     }
     if (viewState.timeOffset < rootEvent.start) {
         viewState.timeOffset = rootEvent.start;
     }
-    if (viewState.yToTime(viewState.viewportHeight-view.BORDER) > rootEvent.end) {
-        viewState.timeOffset -= viewState.yToTime(viewState.viewportHeight-view.BORDER) - rootEvent.end;
+    if (viewState.yToTime(viewState.viewportHeight - BORDER) > rootEvent.end) {
+        viewState.timeOffset -= viewState.yToTime(viewState.viewportHeight - BORDER) - rootEvent.end;
     }
 }
 
@@ -244,7 +244,7 @@ function update(smooth) {
     if (resetTimer) {
         window.clearTimeout(resetTimer);
     }
-    if (viewState.scale < (viewState.viewportHeight - 2*view.BORDER) / (rootEvent.end - rootEvent.start)) {
+    if (viewState.scale < (viewState.viewportHeight - 2 * BORDER) / (rootEvent.end - rootEvent.start)) {
         resetTimer = window.setTimeout(function() {
             fixBounds();
             resetTimer = null;
@@ -274,7 +274,7 @@ function updateTimePointer() {
     timePointer.innerHTML = (showZoom ? 
         '|<span id="reset">&nbsp;&times;&nbsp;</span>' + 
         '|<span id="zoomOut">&nbsp;&minus;&nbsp;</span>' + 
-        '|<span id="zoomIn">&nbsp;&plus;&nbsp;</span>|' : time.toString(t)) + " —";
+        '|<span id="zoomIn">&nbsp;&plus;&nbsp;</span>|' : model.timeToString(t)) + " —";
     
     // use binary search!
     var index = 0;
@@ -379,10 +379,10 @@ timelineElement.onclick = function(event) {
 
 function move(y, delta) {
     console.log("bottom time: " + viewState.yToTime(timelineElement.offsetHeight));
-    if (delta < 0 && viewState.timeOffset <= rootEvent.start) {
-        viewState.zoom(view.BORDER, 1.1);
-    } else if (delta > 0 && viewState.yToTime(viewState.viewportHeight - view.BORDER) >= rootEvent.end) {
-        viewState.zoom(viewState.viewportHeight - view.BORDER, 1.1);
+    if (delta < 0 && viewState.timeOffset <= rootEvent.start ) {
+        viewState.zoom(BORDER, 1.1);
+    } else if (delta > 0 && viewState.yToTime(viewState.viewportHeight - BORDER) >= rootEvent.end) {
+        viewState.zoom(viewState.viewportHeight - BORDER, 1.1);
     } else {
         viewState.timeOffset += delta / viewState.scale;
     }
@@ -395,7 +395,6 @@ window.onresize = function(e) {
     viewState.setViewportHeight(window.innerHeight);
     update();
 };
-
 
 
 function onMouseWheel(e) {
