@@ -3,9 +3,7 @@ var string = require('string');
 var time = require('time');
 var data = require('data');
 var quirks = require('quirks');
-var gutterPackage = require('gutter');
-var gutterElement = document.getElementById('gutter');
-var gutter = new gutterPackage.Gutter(gutterElement);
+var gutter = new view.Gutter(document.getElementById('gutter'));
 var view = require('view');
 
 var timelineElement = document.getElementById('timeline');
@@ -27,10 +25,6 @@ var rootEvent = new timeline.Event(
 var viewState = new view.State(timelineElement.offsetHeight, rootEvent);
 
 var lastMouseY = timelineElement.offsetHeight / 2;
-
-
-gutterElement['_event_'] = rootEvent;
-
 
 
 function toGrayscale(rgb) {
@@ -260,7 +254,7 @@ function update(smooth) {
         fixBounds();
     }
     
-    gutterElement.className = timelineElement.className = smooth ? "smooth" : "";
+    gutter.element.className = timelineElement.className = smooth ? "smooth" : "";
 
     var w = timelineElement.offsetWidth;
     var h = timelineElement.offsetHeight;
@@ -278,9 +272,9 @@ function updateTimePointer() {
     var t = viewState.yToTime(lastMouseY);
     
     timePointer.innerHTML = (showZoom ? 
-        '|<a href="#reset">&nbsp;&times;&nbsp;</a>' + 
-        '|<a href="#zoomOut">&nbsp;&minus;&nbsp;</a>' + 
-        '|<a href="#zoomIn">&nbsp;&plus;&nbsp;</a>|' : time.toString(t)) + " —";
+        '|<span id="reset">&nbsp;&times;&nbsp;</span>' + 
+        '|<span id="zoomOut">&nbsp;&minus;&nbsp;</span>' + 
+        '|<span id="zoomIn">&nbsp;&plus;&nbsp;</span>|' : time.toString(t)) + " —";
     
     // use binary search!
     var index = 0;
@@ -308,46 +302,65 @@ function updateTimePointer() {
 
 //timelineElement.addEventListener('DOMMouseScroll', onMouseWheel, false);  
 timelineElement.addEventListener("mousewheel", onMouseWheel, false);
-gutterElement.addEventListener("mousewheel", onMouseWheel, false);
+gutter.element.addEventListener("mousewheel", onMouseWheel, false);
 
-
-gutterElement.onclick = function(event) {
+document.getElementById("meta").onclick = 
+gutter.element.onclick = function(event) {
     var element = event.target;
-    lastMouseY = event.clientY;
-
     if (element) {
-        var href = element.getAttribute('href')
-        if (href=='#zoomIn') {
-            viewState.zoom(event.clientY, 1.3);
-            update(true);
-            event.preventDefault();
-        } else if (href=='#zoomOut') {
-            viewState.zoom(event.clientY, 1/1.3);
-            update(true);
-            event.preventDefault();
-        } else if (href=='#reset') {
-            viewState.zoomTo(rootEvent);
-            viewState.zoom(viewState.viewportHeight/2, 1/1.1);
-            update(true);
-            event.preventDefault();
+        switch(element.id) {
+            case 'wikipediaTab':
+                showWikipedia('');
+                break;
+            case 'contextTab':
+                showWikipedia(null);
+                break;
+            case 'zoomIn':
+                viewState.zoom(event.clientY, 1.3);
+                update(true);
+                event.preventDefault();
+                break;
+            case 'zoomOut':
+                viewState.zoom(event.clientY, 1/1.3);
+                update(true);
+                event.preventDefault();
+                break;
+            case 'reset':
+                viewState.zoomTo(rootEvent);
+                viewState.zoom(viewState.viewportHeight/2, 1/1.1);
+                update(true);
+                event.preventDefault();
         }
     }
 }
 
 
+function showWikipedia(title) {
+    wikiFrame.style.display = title != null ? "block" : "none";
+    document.getElementById("context").style.display = title != null ? "none" : "block";
+    
+    if (title != null) {
+        document.getElementById("wikipediaTab").classList.add("active");
+        document.getElementById("contextTab").classList.remove("active");
+        if (title) {
+            wikiFrame.src = "http://en.m.wikipedia.org/wiki/"+ title;  
+        }
+    } else {
+        document.getElementById("wikipediaTab").classList.remove("active");
+        document.getElementById("contextTab").classList.add("active");
+    }
+}
+
+
+
 timelineElement.onclick = function(event) {
     var element = event.target;
-    
-    lastMouseY = event.clientY;
     while (element) {
-        
-        
         var href = element.getAttribute("href");
         var e = element['_event_'];
         if (href) {
-            wikiFrame.style.display = "block";
-            document.getElementById("meta").style.display = "none";
-            wikiFrame.src = "http://en.m.wikipedia.org/wiki/"+ href.substr(1);  
+            var cut = href.lastIndexOf('/');
+            showWikipedia(href.substr(cut + 1));
             event.preventDefault();
             break;
         } else if (e) {
@@ -356,8 +369,6 @@ timelineElement.onclick = function(event) {
             }
             viewState.zoomTo(e);
             update(true);
-            wikiFrame.style.display = "none";
-            document.getElementById("meta").style.display = "block";
             event.preventDefault();
             break;
         }
@@ -380,7 +391,6 @@ function move(y, delta) {
 
 window.onresize = function(e) {
     console.log(e);
-    lastMouseY = e.clientY;
     timelineElement.style.height = window.innerHeight;
     viewState.setViewportHeight(window.innerHeight);
     update();
@@ -390,7 +400,6 @@ window.onresize = function(e) {
 
 function onMouseWheel(e) {
     var delta = quirks.getNormalizedWheelDeltaY(event);
-    lastMouseY = e.clientY;
     // shift -> zoom
     if (e.ctrlKey || e.altKey) {
         return;
@@ -402,12 +411,12 @@ function onMouseWheel(e) {
             delta = e.wheelDeltaX;
         }
         if (delta < 0) {
-            viewState.zoom(lastMouseY, ZOOM_FACTOR);
+            viewState.zoom(event.clientY, ZOOM_FACTOR);
         } else if (delta > 0) {
-            viewState.zoom(lastMouseY, 1/ZOOM_FACTOR);
+            viewState.zoom(event.clientY, 1/ZOOM_FACTOR);
         }
     } else {
-        move(lastMouseY, delta);
+        move(event.clientY, delta);
     }
     e.preventDefault();
     update();
@@ -415,7 +424,7 @@ function onMouseWheel(e) {
 
 document.onmousemove = function(event) {
     lastMouseY = event.clientY;
-    showZoom = event.clientX < gutterElement.offsetWidth;
+    showZoom = event.clientX < gutter.element.offsetWidth;
     updateTimePointer();
 };
 

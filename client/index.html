@@ -7,10 +7,9 @@
             box-sizing:border-box;
             -moz-box-sizing:border-box;
         }
-        html {
-            font-size: 80%;
-        }
+       
         body {
+            font-size: 90%;
             border:0;
             padding:0;
             margin:0;
@@ -21,9 +20,8 @@
         #gutter {
             background: linear-gradient( #666, #fff);
             border-right: 1px solid black;
-            font-size:90%;
             height: 100%;
-            width: 120px;
+            width: 111px;
             overflow: hidden;
             position: relative;
             /*background-color: #ccc;*/
@@ -81,7 +79,6 @@
         }
         #timeline .text {
             padding: 4px 4px 4px 24px;
-            font-size:90%;
             overflow: hidden;
             position: relative;
             text-overflow: ellipsis;
@@ -116,55 +113,65 @@
             height:100%;
             width:100%;
             display:none;
+            border: none;
         }
         
         #meta {
+            width: 480px;
             height:100%;
-            width:100%;
-            padding:10px;
+            float: right;
+        }
+        
+        #context {
+            padding: 10px;
         }
         
         #imageContainer {
             border: 1px solid black;
         }
+        
+        #tabs {
+            background-color: #666;
+            height: 40px;
+        }
+        .tab {
+            background-color: #ddd;
+            padding: 10px 20px;
+           
+        }
+        .tab.active {
+            background-color: #fff;
+        }
+        
     </style>
 </head>
 <body style="">
-    <table cellpadding=0 cellspacing=0 border=0 style="width:100%;height:100%">
+    <div id="gutter" style="float:left;width:150px" >
+        <div id="timepointer"></div>
+    </div>
+    <table id="meta" cellspacing=0 cellpadding=0 border=0>
+        <tr id="tabs">
+            <td id="contextTab" class="tab active">Context</td>
+            <td id="wikipediaTab" class="tab">Wikipedia</td>
+            <td width=80> </td>
+        </tr>
         <tr>
-            <td width="100">
-                <div id="gutter">
-                  <div id="timepointer"></div>
-                </div>
-            </td>
-            <td>
-                <div id="timeline"></div>
-            </td>
-            <td width="480">
-                <div id="meta">
+            <td colspan="3" valign="top">
+                <div id="context">
                     <table width="100%" cellspacing=0 cellpadding=0 border=0>
                         <tr>
                             <td height=280 align=center id="imageContainer"><img id="earthImage"></img></td>
                         </tr>
                     </table>
-                    <blockquote>Those who cannot remember the past are condemned to repeat it</blockquote>
-                    <p align="right"><a href="http://en.m.wikipedia.org/wiki/George_Santayana">George Santayana</a>
-                    <p>Use the mouse wheel to scroll up or down. If the start or end of the time line has been reached, 
-                        this will automatically zoom in. You can also zoom in and out explicitly with the scroll wheel
-                        by holding the shift key or pressing the '+' or '-' key.
-                    <p>Clicking an area will zoom in or out to the corresponding period; 
-                        clicking a link will open the corresponding article in this frame.
-                        Clicking the time scale on the left side will zoom out to the full time line.
-                        Clicking the image will show a larger version in this frame including
-                        the image attribution.
                 </div>
-                <iframe id="wikiFrame"></iframe>
+                <iframe id="wikiFrame" src="http://en.m.wikipedia.org/wiki/George_Santayana"></iframe>
             </td>
-        </tr>
+        </tr> 
     </table>
+    <div id="timeline"></div>
     <script src="utils.js"></script>
     <script>
-        load(['time', 'data', 'wiki', 'timeline', 'gutter', 'view', 'main']);
+        load(['time', 'data', 'wiki', 'timeline', 'view', 'main']);
     </script>
 </body>
 </html>

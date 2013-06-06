@@ -48,7 +48,7 @@ wiki.parse = function(wt, toHtml) {
                 }
                 s += wt.substring(pos, i);
                 if (toHtml) {
-                    s += '<a href="#' + link + '">' + label + "</a>";
+                    s += '<a href="http://en.wikipedia.org/wiki/' + link + '">' + label + "</a>";
                 } else {
                     s += label;
                 }
