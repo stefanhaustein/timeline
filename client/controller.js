@@ -6,8 +6,6 @@ var wiki = require('wiki');
 var gutter = new view.Gutter(document.getElementById('gutter'));
 var view = require('view');
 
-var timelineElement = document.getElementById('timeline');
-
 var wikiFrame = document.getElementById('wikiFrame');
 
 var ZOOM_FACTOR = 1.1;
@@ -22,15 +20,11 @@ var rootEvent = new model.Event(
     data.TIMELINES[0], data.TIMELINES[1], 
     data.TIMELINES[2], data.TIMELINES[3], data.TIMELINES[4]);
 
-var eventTree = new view.EventTree(timelineElement, rootEvent);
+var eventTree = new view.EventTree(document.getElementById('eventTree'), rootEvent);
 
-var viewState = new view.State(timelineElement.offsetHeight, BORDER, rootEvent);
+var viewState = new view.State(eventTree.rootElement.offsetHeight, BORDER, rootEvent);
 
-var lastMouseY = timelineElement.offsetHeight / 2;
-
-
-
-
+var lastMouseY = eventTree.rootElement.offsetHeight / 2;
 
 
 
@@ -66,11 +60,11 @@ function update(smooth) {
         fixBounds();
     }
     
-    gutter.element.className = timelineElement.className = smooth ? "smooth" : "";
+    gutter.element.className = eventTree.rootElement.className = smooth ? "smooth" : "";
 
-    var w = timelineElement.offsetWidth;
-    var h = timelineElement.offsetHeight;
-    timelineElement.style.height = h + "px";
+    var w = eventTree.rootElement.offsetWidth;
+    var h = eventTree.rootElement.offsetHeight;
+    eventTree.rootElement.style.height = h + "px";
     
     gutter.update(viewState);
     
@@ -118,7 +112,7 @@ function updateTimePointer() {
 
 
 //timelineElement.addEventListener('DOMMouseScroll', onMouseWheel, false);  
-timelineElement.addEventListener("mousewheel", onMouseWheel, false);
+eventTree.rootElement.addEventListener("mousewheel", onMouseWheel, false);
 gutter.element.addEventListener("mousewheel", onMouseWheel, false);
 
 document.body.onclick = function(event) {
@@ -197,7 +191,7 @@ function showWikipedia(title) {
 
 
 function move(y, delta) {
-    console.log("bottom time: " + viewState.yToTime(timelineElement.offsetHeight));
+    console.log("bottom time: " + viewState.yToTime(eventTree.rootElement.offsetHeight));
     if (delta < 0 && viewState.timeOffset <= rootEvent.start ) {
         viewState.zoom(BORDER, 1.1);
     } else if (delta > 0 && viewState.yToTime(viewState.viewportHeight - BORDER) >= rootEvent.end) {
@@ -210,7 +204,7 @@ function move(y, delta) {
 
 window.onresize = function(e) {
     console.log(e);
-    timelineElement.style.height = window.innerHeight;
+    eventTree.rootElement.style.height = window.innerHeight;
     viewState.setViewportHeight(window.innerHeight);
     update();
 };
@@ -250,7 +244,7 @@ document.onmousemove = function(event) {
 document.onkeydown = function(event) {
     console.log(event);
     var char = event.which == null ? event.keyCode : event.which;
-    var y = timelineElement.offsetHeight / 2;
+    var y = eventTree.rootElement.offsetHeight / 2;
     if (char === 187) {
         viewState.zoom(y, ZOOM_FACTOR);
     } else if (char === 189) {

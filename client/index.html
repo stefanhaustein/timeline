@@ -49,8 +49,8 @@
             background-color:red;
             z-index:1;
         }
-        
-        #timeline {
+
+        #eventTree {
             background: linear-gradient( #666, #fff); /*
             background-color: #333;
             background-image:url('tile.gif'); */
@@ -59,25 +59,25 @@
             position: relative;
             overflow: hidden;
         }
-        #timeline .animated {
+        #eventTree .animated {
             transition: left 0.5s;
             -webkit-transition: left 0.5s;
             
         }
-        #timeline.smooth .animated, #gutter.smooth .animated {
+        #eventTree.smooth .animated, #gutter.smooth .animated {
           transition: top 0.5s, height 0.5s, left 0.5s, width 0.5s;
           -webkit-transition: top 0.5s, height 0.5s, left 0.5s, width 0.5s;
         }
-        #timeline  .event {
+        #eventTree  .event {
             /*border-top:1px solid black;*/
             position: absolute;
             overflow:hidden; 
         }
-        #timeline .span {
+        #eventTree .span {
             overflow:hidden; 
             position: absolute;
         }
-        #timeline .text {
+        #eventTree .text {
             padding: 4px 4px 4px 24px;
             overflow: hidden;
             position: relative;
@@ -90,7 +90,7 @@
             text-indent: -20px;
             height: 100%;
         }
-        #timeline .rot {
+        #eventTree .rot {
             padding: 3px;
             font-size: small;
             overflow: hidden;
@@ -117,7 +117,7 @@
         }
         
         #meta {
-            width: 480px;
+            width: 360px;
             height:100%;
             float: right;
         }
@@ -160,18 +160,19 @@
                 <div id="context">
                     <table width="100%" cellspacing=0 cellpadding=0 border=0>
                         <tr>
-                            <td height=200 align=center id="imageContainer"><a id="earthImageLink"><img id="earthImage"></img></a></td>
+                            <td height=200 align=center id="imageContainer"
+                              ><a id="earthImageLink"><img id="earthImage"></img></a></td>
                         </tr><tr>
                             <td align=center><span id="imageSubtitle"></span>. 
                                (Click the inage for details and attribution)</td>
                         </tr>
                     </table>
                 </div>
-                <iframe id="wikiFrame" src="http://en.m.wikipedia.org/wiki/George_Santayana"></iframe>
+                <iframe id="wikiFrame" src="http://en.m.wikipedia.org/wiki/Main_Page"></iframe>
             </td>
         </tr> 
     </table>
-    <div id="timeline"></div>
+    <div id="eventTree"></div>
     <script src="utils.js"></script>
     <script>
         load(['data', 'wiki', 'model', 'view', 'controller']);

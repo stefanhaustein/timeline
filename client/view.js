@@ -224,7 +224,7 @@ view.EventTree.prototype.measureDepth = function(event, viewState) {
         var start = viewState.timeToY(child.start);
         var end = viewState.timeToY(child.end);
         if (end < -h/2 || start > 1.5 * h || start == end) continue;
-        if (end - start < h / 3) {
+        if (end - start < view.EventTree.LABEL_WIDTH) {
             return 0;
         }
         var d = this.measureDepth(child, viewState) + 1;
@@ -245,6 +245,51 @@ view.EventTree.prototype.render = function(viewState) {
     this.renderEvent(viewState, this.rootElement, 0, this.rootEvent,
         false, this.rootEvent.end, depth, 0.5, w, h);
 };
+
+
+view.EventTree.prototype.renderLeaf = function(viewState, parentElement, parentY, event, 
+        overlap, timeLimit, remainingWidth) {
+    var y = viewState.timeToY(event.start);
+    var top = y - parentY;
+
+    var element = document.getElementById(event.id);
+    if (overlap) {
+        if (element) {
+            parentElement.removeChild(element);
+        }
+        return 0;
+    }
+
+    var textDiv;
+    if (!element) {
+        element = document.createElement("div");
+        element.setAttribute('id', event.id);
+        element.className = 'event';
+        element['_event_'] = event;
+        textDiv = document.createElement("div");
+        textDiv.className = 'text';
+        textDiv.innerHTML = event.getHtml();
+        parentElement.appendChild(element);
+        element.appendChild(textDiv);
+    } else {
+        element.classList.add('animated');
+        textDiv = element.firstChild;
+    }
+    
+    // TODO(haustein) Avoid this here; needed for height calculation
+    element.style.top = top;
+    element.style.width = remainingWidth;
+    element.style.display = "block";
+
+    var height = textDiv.offsetHeight;
+    if (viewState.timeToY(event.start) + height > viewState.timeToY(timeLimit)) {
+        element.style.display = "none";
+        return 0;
+    }
+
+    return height;
+};
+
 
 view.EventTree.prototype.renderEvent = function(viewState, parentElement, parentY, event, 
         overlap, timeLimit, collapse, fraction, remainingWidth, viewportHeight) {
@@ -357,7 +402,6 @@ view.EventTree.prototype.renderEvent = function(viewState, parentElement, parent
         textDiv.style.display = height >= 20 ? "block": "none";
     }
 
-
     if (remainingWidth < view.EventTree.LABEL_WIDTH || height < 50 || 
             y + height/2 < -viewportHeight || y > 1.5 * viewportHeight) {
         if (containerDiv) {
@@ -392,9 +436,17 @@ view.EventTree.prototype.renderEvent = function(viewState, parentElement, parent
 
         var childOverlap = filledTo > viewState.timeToY(child.start);
 
-        var childHeight = this.renderEvent(viewState,
-            containerDiv, y, event.children[i], childOverlap, childTimeLimit, 
-            collapse - 1, i / (count + 1),  remainingWidth, viewportHeight);
+        var childHeight;
+        
+        if (child.start == child.end) {
+            childHeight = this.renderLeaf(viewState, 
+                containerDiv, y, child, childOverlap, childTimeLimit,
+                remainingWidth);
+        } else {
+            childHeight = this.renderEvent(viewState,
+                containerDiv, y, child, childOverlap, childTimeLimit, 
+                collapse - 1, i / (count + 1),  remainingWidth, viewportHeight);
+        }
         if (!childOverlap && childHeight != 0) {
             filledTo = viewState.timeToY(child.start) + childHeight;
         }
