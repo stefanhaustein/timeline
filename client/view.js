@@ -242,13 +242,13 @@ view.EventTree.prototype.render = function(viewState) {
     
     window.console.log("render; w: " + w + " H: " +h);
     
-    this.renderEvent(viewState, this.rootElement, 0, this.rootEvent,
-        false, this.rootEvent.end, depth, 0.5, w, h);
+    this.renderEvent(
+        viewState, this.rootElement, 0, this.rootEvent, depth, 0.5, w, h);
 };
 
 
-view.EventTree.prototype.renderLeaf = function(viewState, parentElement, parentY, event, 
-        overlap, timeLimit, remainingWidth) {
+view.EventTree.prototype.renderLeaf = function(
+        viewState, parentElement, parentY, event, overlap, timeLimit, width) {
     var y = viewState.timeToY(event.start);
     var top = y - parentY;
 
@@ -260,28 +260,28 @@ view.EventTree.prototype.renderLeaf = function(viewState, parentElement, parentY
         return 0;
     }
 
-    var textDiv;
+    var labelDiv;
     if (!element) {
         element = document.createElement("div");
         element.setAttribute('id', event.id);
         element.className = 'event';
         element['_event_'] = event;
-        textDiv = document.createElement("div");
-        textDiv.className = 'text';
-        textDiv.innerHTML = event.getHtml();
+        labelDiv = document.createElement("div");
+        labelDiv.className = 'text';
+        labelDiv.innerHTML = event.getHtml();
         parentElement.appendChild(element);
-        element.appendChild(textDiv);
+        element.appendChild(labelDiv);
     } else {
         element.classList.add('animated');
-        textDiv = element.firstChild;
+        labelDiv = element.firstChild;
     }
     
     // TODO(haustein) Avoid this here; needed for height calculation
     element.style.top = top;
-    element.style.width = remainingWidth;
+    element.style.width = width;
     element.style.display = "block";
 
-    var height = textDiv.offsetHeight;
+    var height = labelDiv.offsetHeight;
     if (viewState.timeToY(event.start) + height > viewState.timeToY(timeLimit)) {
         element.style.display = "none";
         return 0;
@@ -291,8 +291,8 @@ view.EventTree.prototype.renderLeaf = function(viewState, parentElement, parentY
 };
 
 
-view.EventTree.prototype.renderEvent = function(viewState, parentElement, parentY, event, 
-        overlap, timeLimit, collapse, fraction, remainingWidth, viewportHeight) {
+view.EventTree.prototype.renderEvent = function(
+        viewState, parentElement, parentY, event, collapse, fraction, width, viewportHeight) {
     var y = viewState.timeToY(event.start);
     var height = (event.end - event.start) * viewState.scale;
     
@@ -305,104 +305,78 @@ view.EventTree.prototype.renderEvent = function(viewState, parentElement, parent
         height = 4 * viewportHeight;
     } 
     
-    var textOnly = event.start == event.end;
     var top = y - parentY;
     var count = event.children.length;
 
     var element = document.getElementById(event.id);
     var textTop = y < 0 ? -y : 0;
 
-    var textDiv;
+    var labelDiv;
     var containerDiv = null; 
     if (!element) {
-        if (textOnly && overlap) return 0;
         element = document.createElement("div");
         element.setAttribute('id', event.id);
         element.className = event.start == event.end ? 'event' : 'span';
         element['_event_'] = event;
-        textDiv = document.createElement("div");
-        textDiv.className = 'text';
-        textDiv.innerHTML = event.getHtml();
+        labelDiv = document.createElement("div");
+        labelDiv.className = 'text';
+        labelDiv.innerHTML = event.getHtml();
         parentElement.appendChild(element);
-        element.appendChild(textDiv);
+        element.appendChild(labelDiv);
         if (count || event.needsFetch || event.fetchChildren) {
             containerDiv = document.createElement("div");
+            containerDiv.className = 'container';
             element.appendChild(containerDiv);
         }
-        if (event.start < event.end) {
-            var rgb = event.color;
-            if (!rgb) {
-                if (event.parent && event.parent.color) {
-                    var prgb = event.parent.color;
-                    var f = fraction * 0.7 + 0.7;
-                    rgb = [prgb[0]*f, prgb[1]*f, prgb[2]*f];
-                } else {
-                    rgb = view.hsvToRgb(200.0 * fraction, 0.5, 1);
-                    event.color = rgb;
-                }
+        var rgb = event.color;
+        if (!rgb) {
+            if (event.parent && event.parent.color) {
+                var prgb = event.parent.color;
+                var f = fraction * 0.7 + 0.7;
+                rgb = [prgb[0]*f, prgb[1]*f, prgb[2]*f];
+            } else {
+                rgb = view.hsvToRgb(200.0 * fraction, 0.5, 1);
+                event.color = rgb;
             }
-            element.style.backgroundColor = 
-                'rgb(' + Math.floor(rgb[0])+ "," + Math.floor(rgb[1]) + "," + Math.floor(rgb[2])+')';
-            element.style.borderColor = element.style.color = 
-                (rgb && view.toGrayscale(rgb) < 48) ? "#ccc" : "#333";
-        } 
+        }
+        element.style.backgroundColor = 
+            'rgb(' + Math.floor(rgb[0])+ "," + Math.floor(rgb[1]) + "," + Math.floor(rgb[2])+')';
+        element.style.borderColor = element.style.color = 
+            (rgb && view.toGrayscale(rgb) < 48) ? "#ccc" : "#333";
     } else {
         element.classList.add('animated');
-        textDiv = element.firstChild;
+        labelDiv = element.firstChild;
         if (count !== 0) {
-            containerDiv = textDiv.nextSibling;
+            containerDiv = labelDiv.nextSibling;
         }
     }
-    
-    // TODO(haustein) Avoid this here
     
     element.style.top = top;
-    element.style.width = remainingWidth;
+    element.style.width = width;
+    element.style.height = height;
    
-    if (count) {
-        if (event.description == "Timeline of natural history") {
-            textDiv.style.display = "none";
-            containerDiv.setAttribute("style",
-                "position:absolute;top:0;left:0;height:"+height+";width:"+ remainingWidth + "px");
-        } else {
-            var lw;
-            if (collapse >= 0) {
-                textDiv.className = "rot";
-                lw = view.EventTree.ROT_LABEL_WIDTH;
-                textDiv.style.width = height;
-                textDiv.style.height = lw;
-                textDiv.style.top = textTop + height;
-            } else {
-                textDiv.className = "text";
-                lw = view.EventTree.LABEL_WIDTH;
-                textDiv.style.top = textTop;
-                textDiv.style.width = lw;
-                textDiv.style.height = height;
-            }
-            remainingWidth -= lw;
-            textDiv.style.display = "block";
-            containerDiv.setAttribute("style",
-                "position:absolute;left:"+lw+"px;top:0;height:"+height+";width:"+ remainingWidth + "px");
-        } 
-    } 
-    
-    if (textOnly) {
-        if (overlap) {
-            parentElement.removeChild(element);
-            return 0;
-        }
-        element.style.display = "block";
-        height = textDiv.offsetHeight;
-        if (viewState.timeToY(event.start) + height > viewState.timeToY(timeLimit)) {
-            element.style.display = "none";
-            return 0;
-        } 
+    var labelWidth;
+    if (event === this.rootEvent) {
+        labelWidth = 0;
+    } else if (collapse >= 0) {
+        labelDiv.className = "rot";
+        labelWidth = view.EventTree.ROT_LABEL_WIDTH;
+        labelDiv.style.width = height;
+        labelDiv.style.height = labelWidth;
+        labelDiv.style.top = textTop + height;
     } else {
-        element.style.height = height;
-        textDiv.style.display = height >= 20 ? "block": "none";
+        labelDiv.className = "text";
+        labelWidth = view.EventTree.LABEL_WIDTH;
+        labelDiv.style.top = textTop;
+        labelDiv.style.width = labelWidth;
+        labelDiv.style.height = height;
     }
+    var containerWidth = width - labelWidth;
+    labelDiv.style.display = labelWidth > 0 ? "block" : "none";
+    containerDiv.style.left = labelWidth;
+    containerDiv.style.width = containerWidth;
 
-    if (remainingWidth < view.EventTree.LABEL_WIDTH || height < 50 || 
+    if (containerWidth < view.EventTree.LABEL_WIDTH || height < 50 || 
             y + height/2 < -viewportHeight || y > 1.5 * viewportHeight) {
         if (containerDiv) {
             containerDiv.innerHTML = "";
@@ -439,13 +413,11 @@ view.EventTree.prototype.renderEvent = function(viewState, parentElement, parent
         var childHeight;
         
         if (child.start == child.end) {
-            childHeight = this.renderLeaf(viewState, 
-                containerDiv, y, child, childOverlap, childTimeLimit,
-                remainingWidth);
+            childHeight = this.renderLeaf(
+                viewState, containerDiv, y, child, childOverlap, childTimeLimit, containerWidth);
         } else {
-            childHeight = this.renderEvent(viewState,
-                containerDiv, y, child, childOverlap, childTimeLimit, 
-                collapse - 1, i / (count + 1),  remainingWidth, viewportHeight);
+            childHeight = this.renderEvent(
+                viewState, containerDiv, y, child, collapse - 1, i / (count + 1),  containerWidth, viewportHeight);
         }
         if (!childOverlap && childHeight != 0) {
             filledTo = viewState.timeToY(child.start) + childHeight;
