@@ -14,7 +14,6 @@ var BORDER = 10;
 var showZoom = false;
 
 var timePointer = document.getElementById("timepointer");
-var earthImage = document.getElementById('earthImage');
 
 var rootEvent = new model.Event(
     data.TIMELINES[0], data.TIMELINES[1], 
@@ -75,37 +74,44 @@ function update(smooth) {
 
 function updateTimePointer() {
     timePointer.style.top = lastMouseY - timePointer.offsetHeight / 2;
-    var t = viewState.yToTime(lastMouseY);
+    var time = viewState.yToTime(lastMouseY);
     
     timePointer.innerHTML = (showZoom ? 
         '|<span id="reset">&nbsp;&times;&nbsp;</span>' + 
         '|<span id="zoomOut">&nbsp;&minus;&nbsp;</span>' + 
-        '|<span id="zoomIn">&nbsp;&plus;&nbsp;</span>|' : model.timeToString(t)) + " —";
+        '|<span id="zoomIn">&nbsp;&plus;&nbsp;</span>|' : model.timeToString(time)) + " —";
     
     // use binary search!
     var index = 0;
-    while (index+1 < data.GLOBES.length && data.GLOBES[index+1][0] < t) {
+    var count = data.GLOBES.length;
+    while (index + 1 < count && data.GLOBES[index + 1][0] < time) {
         index++;
     }
-    var globe = data.GLOBES[index];
-    var imgName = globe[1];
+    var globeData = data.GLOBES[index];
+    var imageTime = globeData[0];
+    var imageLabel = globeData[1];
+    var imageName = globeData[2];
+    var backgroundColor = globeData[3]  ? "black" : "white";
+    var scale = globeData[4] ? globeData[4] : 1;
 
-    document.getElementById("imageContainer").style.backgroundColor = 
-        globe[2] ? "black" : "white";
+    var imageContainerElement = document.getElementById("imageContainer");
+    var earthImageLinkElement = document.getElementById("earthImageLink");
+    var earthImageElement = document.getElementById("earthImage");
+    var earthImageSubtitleElement = document.getElementById("imageSubtitle");
 
-    var width = 320;
-    if (globe[3]){
-        width *= globe[3];
-    }
-    var cut = imgName.lastIndexOf('/');
-//    earthImage.width = "" + Math.floor(width);
-    earthImage.src="http://upload.wikimedia.org/wikipedia/commons/thumb/" + 
-        imgName + "/" + width + "px-" + imgName.substr(cut + 1);
-    document.getElementById("earthImageLink").setAttribute('href', 
-    wiki.getUrl('File:' + imgName.substr(cut + 1)));
-    
-    document.getElementById("imageSubtitle").innerHTML = model.timeToString(globe[0]);
+    imageContainerElement.style.backgroundColor = backgroundColor;
 
+    var width = 320 * scale;
+    var cut = imageName.lastIndexOf('/');
+    var link = wiki.getUrl('File:' + imageName.substr(cut + 1));
+
+    earthImageElement.src = 
+        "http://upload.wikimedia.org/wikipedia/commons/thumb/" + 
+        imageName + "/" + width + "px-" + imageName.substr(cut + 1);
+    earthImageLinkElement.href = link;
+    earthImageSubtitleElement.innerHTML = 
+        imageLabel + ' ' + model.timeToString(imageTime);
+    earthImageSubtitleElement.href = link;
 }
 
 // Event handlers 

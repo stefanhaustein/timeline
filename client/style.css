@@ -1,0 +1,140 @@
+a:link, a:hover, a:active, a:visited { color: inherit; }
+* {
+    box-sizing:border-box;
+    -moz-box-sizing:border-box;
+}
+
+body {
+    font-size: 90%;
+    border:0;
+    padding:0;
+    margin:0;
+    font-family:sans-serif;
+    height:100%;
+}
+
+#gutter {
+    background: linear-gradient( #666, #fff);
+    border-right: 1px solid black;
+    height: 100%;
+    width: 111px;
+    overflow: hidden;
+    position: relative;
+    color:#000;
+}
+#gutter .timeStep {
+    position: absolute;
+    text-align: right;
+    width: 100%;
+}
+#bottomimage {
+    position:absolute;
+    bottom:0;
+}
+
+#timepointer a {
+    text-decoration: none;
+}
+#timepointer {
+    padding: 5px 0 5px 0;
+    width:100%;
+    position:relative;
+    text-align:right;
+    color:white;
+    background-color:red;
+    z-index:1;
+}
+
+/** eventTree */
+
+#eventTree {
+    background: linear-gradient( #666, #fff);
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+#eventTree .animated {
+    transition: left 0.5s;
+    -webkit-transition: left 0.5s;
+}
+#eventTree.smooth .animated, #gutter.smooth .animated {
+    transition: top 0.5s, height 0.5s, left 0.5s, width 0.5s;
+  -webkit-transition: top 0.5s, height 0.5s, left 0.5s, width 0.5s;
+}
+#eventTree .span {
+    overflow:hidden; 
+    position: absolute;
+}
+#eventTree .container {
+    position:absolute;
+    top:0;
+    height: 100%;
+}
+#eventTree .leaf {
+    /*border-top:1px solid black;*/
+    overflow: hidden;
+    padding: 3px 3px 3px 24px;
+    position: absolute;
+    text-indent: -20px;
+    text-overflow: ellipsis;
+}
+#eventTree .label {
+    padding: 3px;
+    overflow: hidden;
+    position: relative;
+    text-overflow: ellipsis;
+        /*    -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none */;
+    height: 100%;
+}
+#eventTree .label.rot {
+    -moz-transform: rotate(-90deg);  
+    -ms-transform: rotate(-90deg);  
+    -o-transform: rotate(-90deg);  
+    -webkit-transform: rotate(-90deg); 
+    transform: rotate(-90deg); 
+    -moz-transform-origin: top left;
+    -ms-transform-origin: top left;
+    -o-transform-origin: top left;
+    -webkit-transform-origin: top left;
+    transform-origin: top left;
+    text-align: right;
+}
+
+#wikiFrame {
+    height:100%;
+    width:100%;
+    display:none;
+    border: none;
+}
+
+#meta {
+    width: 360px;
+    height:100%;
+    float: right;
+}
+
+#context {
+    padding: 10px;
+}
+
+#imageContainer {
+    border: 1px solid black;
+}
+#imageSubtitle {
+    text-align:center;
+}
+#tabs {
+    background-color: #666;
+    height: 40px;
+}
+.tab {
+    background-color: #ddd;
+    padding: 10px 20px;
+}
+.tab.active {
+    background-color: #fff;
+}

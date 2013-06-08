@@ -260,28 +260,22 @@ view.EventTree.prototype.renderLeaf = function(
         return 0;
     }
 
-    var labelDiv;
     if (!element) {
         element = document.createElement("div");
         element.setAttribute('id', event.id);
-        element.className = 'event';
+        element.className = 'leaf';
         element['_event_'] = event;
-        labelDiv = document.createElement("div");
-        labelDiv.className = 'text';
-        labelDiv.innerHTML = event.getHtml();
+        element.innerHTML = event.getHtml();
         parentElement.appendChild(element);
-        element.appendChild(labelDiv);
     } else {
         element.classList.add('animated');
-        labelDiv = element.firstChild;
     }
-    
-    // TODO(haustein) Avoid this here; needed for height calculation
+
     element.style.top = top;
     element.style.width = width;
     element.style.display = "block";
 
-    var height = labelDiv.offsetHeight;
+    var height = element.offsetHeight;
     if (viewState.timeToY(event.start) + height > viewState.timeToY(timeLimit)) {
         element.style.display = "none";
         return 0;
@@ -312,7 +306,7 @@ view.EventTree.prototype.renderEvent = function(
     var textTop = y < 0 ? -y : 0;
 
     var labelDiv;
-    var containerDiv = null; 
+    var containerDiv; 
     if (!element) {
         element = document.createElement("div");
         element.setAttribute('id', event.id);
@@ -323,11 +317,9 @@ view.EventTree.prototype.renderEvent = function(
         labelDiv.innerHTML = event.getHtml();
         parentElement.appendChild(element);
         element.appendChild(labelDiv);
-        if (count || event.needsFetch || event.fetchChildren) {
-            containerDiv = document.createElement("div");
-            containerDiv.className = 'container';
-            element.appendChild(containerDiv);
-        }
+        containerDiv = document.createElement("div");
+        containerDiv.className = 'container';
+        element.appendChild(containerDiv);
         var rgb = event.color;
         if (!rgb) {
             if (event.parent && event.parent.color) {
@@ -346,9 +338,7 @@ view.EventTree.prototype.renderEvent = function(
     } else {
         element.classList.add('animated');
         labelDiv = element.firstChild;
-        if (count !== 0) {
-            containerDiv = labelDiv.nextSibling;
-        }
+        containerDiv = labelDiv.nextSibling;
     }
     
     element.style.top = top;
@@ -359,13 +349,13 @@ view.EventTree.prototype.renderEvent = function(
     if (event === this.rootEvent) {
         labelWidth = 0;
     } else if (collapse >= 0) {
-        labelDiv.className = "rot";
+        labelDiv.className = "label rot";
         labelWidth = view.EventTree.ROT_LABEL_WIDTH;
         labelDiv.style.width = height;
         labelDiv.style.height = labelWidth;
         labelDiv.style.top = textTop + height;
     } else {
-        labelDiv.className = "text";
+        labelDiv.className = "label";
         labelWidth = view.EventTree.LABEL_WIDTH;
         labelDiv.style.top = textTop;
         labelDiv.style.width = labelWidth;
