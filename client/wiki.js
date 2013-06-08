@@ -48,7 +48,7 @@ wiki.parse = function(wt, toHtml) {
                 }
                 s += wt.substring(pos, i);
                 if (toHtml) {
-                    s += '<a href="http://en.wikipedia.org/wiki/' + link + '">' + label + "</a>";
+                    s += '<a href="' +  wiki.getUrl(link) +  '">' + label + "</a>";
                 } else {
                     s += label;
                 }
@@ -74,6 +74,10 @@ wiki.parse = function(wt, toHtml) {
 };
 
 wiki.callbackId = 0;
+
+wiki.getUrl = function(title) {
+  return 'http://en.wikipedia.org/wiki/' + title; 
+}
 
 wiki.fetchHtml = function(title, callback) {
     var callbackName = "globaljsonpcallback" + wiki.callbackId++;
