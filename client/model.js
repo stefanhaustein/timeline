@@ -16,10 +16,11 @@ model.MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
  * @param {string} s
  */
 model.parseTime = function(s) {
-    s = string.trim(s).replace(',', '');
+    // TODO(haustein) Fix: Only replaces the first. 
+    s = s.trim().replace(',', '');
     var original = s;
     if (string.startsWith(s, 'c.')) {
-        s = string.trim(s.substr(2));
+        s = s.substr(2).trim();
     }
     
     var cut = s.indexOf(' ');
@@ -55,24 +56,62 @@ model.parseTime = function(s) {
     return result;
 };
 
+
+/**
+ * Formats the number by converting it to fixd point notation with the given
+ * number of digits and inserting a '.' for every 3 digits in the integer part. 
+ * 
+ * @param {number} n The number to format
+ * @param {number} fd Fraction digits to show.
+ */
+model.formatNumber = function(n, fd) {
+    var positive = n < 0 ? -n : n;
+    var s = positive.toFixed(fd);
+    var cut = s.indexOf('.');
+    if (cut == -1) {
+        cut = s.length;
+    }
+    while (cut - 3 > 0) {
+        cut -= 3;
+        s = s.substr(0, cut) + ',' + s.substr(cut);
+    }
+    return n < 0 ? '-' + s : s;
+};
+
 /**
  * Converts the given time to a string.
+ * 
  * @param {number} time
  */
-model.timeToString = function(time, opt_precision) {
-    if (time < -100000) {
-        return "" + ((time-2013) / -1000000.0).toFixed(2) + " Ma";
+model.timeToString = function(time, precision) {
+    if (!precision) {
+        precision = 1000000000;
+    } else {
+        precision = Math.abs(precision);
+    }
+    if (time-2013 <= -100000 && precision >= 1e4) {
+        var nk;
+        if (precision <  1e5) {
+            nk = 2;
+        } else if (precision < 1e6) {
+            nk = 1;
+        } else {
+            nk = 0;
+        }
+        return model.formatNumber((time-2013) / -1000000.0, nk) + " Ma";
     }
     
     var year = Math.floor(time);
-    if (year != time && time > 0) {
-        var index = Math.floor((time - year) * 12)
-        return model.MONTHS[index] + ". " + year;
+    // Don't show 1,970 instead of just 1970.
+    var s = Math.abs(year) >= 10000 ? model.formatNumber(year, 0) : year.toFixed(0);
+    if (year != time && time > 0 && precision < 1) {
+        var index = Math.floor((time - year) * 12);
+        s = model.MONTHS[index] + ". " + s;
     }
-    return "" + year;
+    return s;
 };
 
-model.DASHES = ['–', '-', '—', ' to ', '&mdash;']
+model.DASHES = ['–', '-', '—', ' to ', '&mdash;'];
 
 /** 
  * Parses a time interval to the start and end properties of the given
@@ -82,7 +121,6 @@ model.DASHES = ['–', '-', '—', ' to ', '&mdash;']
  * @param {{start: number, end: number}} target
  */
 model.parseInterval = function(s, target) {
-    
     var dash;
     var cut = -1;
     for (var i = 0; i < model.DASHES.length; i++) {
@@ -96,8 +134,8 @@ model.parseInterval = function(s, target) {
         return;
     }
     
-    var s0 = string.trim(s.substr(0, cut));
-    var s1 = string.trim(s.substr(cut + dash.length));
+    var s0 = s.substr(0, cut).trim();
+    var s1 = s.substr(cut + dash.length).trim();
     
     // Copy the unit to the first time if only the second has one
     if (s0.length > 0 && s0.charAt(s0.length - 1) >= '0' && s0.charAt(s0.length - 1) <= '9') {
@@ -115,7 +153,7 @@ model.parseInterval = function(s, target) {
 
 
 model.getColor = function(name) {
-    var s = string.trim(name);
+    var s = name.trim();
     var cut = name.indexOf(']]');
     if (cut != -1) {
         s = s.substring(0, cut);
@@ -371,7 +409,7 @@ model.Event.prototype.parse = function(text) {
                 if (timespan == '200,000 - 50,000 years ago') {
                     window.console.log('skipping: ' + line);
                 } else {
-                    var childEvent = new model.Event(timespan, timespan + ': ' + string.trim(description));
+                    var childEvent = new model.Event(timespan, timespan + ': ' + description.trim());
                     childEvent.end = childEvent.start; // hack.
                     if (!isNaN(childEvent.start)) {
                         current.append(childEvent);

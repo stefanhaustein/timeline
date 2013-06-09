@@ -6,32 +6,75 @@
     </style>
 </head>
 <body>
-    <div id="gutter" style="float:left;width:150px" >
-        <div id="timepointer"></div>
-    </div>
-    <table id="meta" cellspacing=0 cellpadding=0 border=0>
+    <!-- This ugly thing comes first and floats to the right. 
+         This is a table so we can use height: 100% -->
+    <table id="sidebar" cellspacing=0 cellpadding=0 border=0>
         <tr id="tabs">
             <td id="contextTab" class="tab active">Context</td>
+            <td id="metaTab" class="tab">Meta</td>
             <td id="wikipediaTab" class="tab">Wikipedia</td>
             <td width=80> </td>
         </tr>
         <tr>
-            <td colspan="3" valign="top">
-                <div id="context">
-                    <table width="100%" cellspacing=0 cellpadding=0 border=0>
-                        <tr>
-                            <td height=200 align=center 
-                              ><a id="globe"></a></td>
-                        </tr><tr>
-                            <td align=center><a id="globeLabel"></a></td>
-                        </tr>
+            <td colspan="4" valign="top">
+                <div id="contextCard" class="card">
+                    <a id="globe"></a>
+                    <a id="globeLabel"></a>
+
+                    <!-- Finally, a HTML table used for rendering an actual table! -->
+                    <table class="dataTable">
+                        <tr><td>Time</td><td class="data" id="time">n/a</td><td id="timeUnit" width="50px"></td></tr>
+                        <tr><td>Athmospheric O<sub>2</sub></td><td class="data" id="o2">n/a</td><td>Vol %</td></tr>
+                        <tr><td>Athmospheric CO<sub>2</sub></td><td class="data" id="co2">n/a</td><td>ppm</td></tr>
+                        <tr><td>Surface Temperature</td><td class="data" id="temperature">n/a</td><td>°C</td></tr>
+                        <tr><td>Sea Level</td><td class="data" id="seaLevel">n/a</td><td>m</td></tr>
+                        <tr><td>Population</td><td class="data" id="population">n/a</td><td id="populationUnit"></td></tr>
                     </table>
                 </div>
-                <iframe id="wikiFrame" src="http://en.m.wikipedia.org/wiki/Main_Page"></iframe>
+                <div id="metaCard" class="card">
+                    <p><b>Timeline</b></p>
+                    <p>This project pulls timelines from Wikipedia, parses them
+                        and puts them into a coherent zoomable view. This is
+                        mostly inspired by "<a href="http://htwins.net/scale2/">The Scale of the Universe</a>".
+                        </p>
+                    <p>The source code is available at 
+                        <a href='https://github.com/stefanhaustein/timeline'>github.com/stefanhaustein/timeline</a>.</p>
+                    <p>Features I'd like to add:</p>
+                    <ol>
+                        <li>Fill the context table from existing data in data.js</li>
+                        <li>Make time spans <b>linkable</b> using url fragments and remove the corresponding click handler</li>
+                        <li>Limit events to one line unless there is more space available; this should also simplify some calculations. Show the full text on hover.</li>
+                        <li>Automatically zoom out when srolling into "boring" regions</li>
+                        <li>Make it possible to change the sizes of the main panel and the side panel</li>
+                        <li>Add background <b>photos</b> (moon landing etc.) to data.js and render them in the time scale on the left side (in a way that looks good and not cluttered)</li>
+                        <li>Add <b>graphs</b> to the gutter: If you click a data field (e.g. CO<sub>2</sub>),
+                            plot it on the time scale (turning off the photo feature when it is implemented)</li>
+                        <li>Switchable <b>topic timelines</b>, e.g. for WW II, where more data is available on Wikipedia (perhaps as some kind of bar 
+                            on the right side in the closed state, as it may cross multiple time spans...)</li>
+                        </li>
+                        <li><b>More data</b> in data.js; include sources.</li>
+                        <li>Better adjust the globe positions, so they <b>don't shift around</b>, in particular around WW II</li>
+                        <li>Blend the maps into each other at boundaries</li>
+                        <li>Some kind of <b>weighting</b>, so more important events shou up first (no idea how to do this automatically yet)</li>
+                        <li>Full <b>touch</b> support</li>
+                        <li>Add support for <b>dragging</b> the timeline and gutter</li>
+                        <li>Better automatic title rotation</li>
+                        <li>More graceful degradation for <b>small screens</b></li>
+                        <li>Test on <b>more browsers</b>, in particular scroll wheel speed</li>
+                    </ol>
+                   
+                </div>
+                <iframe id="wikipediaCard" class="card" src="http://en.m.wikipedia.org/wiki/Main_Page"></iframe>
             </td>
         </tr> 
     </table>
-    <div id="eventTree"></div>
+    <div id="timeline">
+        <div id="gutter" >
+            <div id="timepointer">
+                <span id="reset">reset&nbsp;</span>|<span id="zoomOut">&nbsp;&minus;&nbsp;</span>|<span id="zoomIn">&nbsp;&plus;&nbsp;</span>| —</div>
+        </div>
+        <div id="eventTree"></div>
+    </div>
     <script src="utils.js"></script>
     <script>
         load(['data', 'wiki', 'model', 'view', 'controller']);

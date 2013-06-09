@@ -77,7 +77,7 @@ data.GLOBES = [
     [    1660, "Colonisation", "7/74/Colonisation_1660.png"],
     [    1754, "Colonisation", "c/ca/Colonisation_1754.png"],
     [    1800, "Colonisation", "2/2b/Colonisation_1800.png"],
-    [    1898, "Colonisation", "2/24/World_1898_empires_colonies_territory.png", 1.1, 0.1],
+//    [    1898, "Colonisation", "2/24/World_1898_empires_colonies_territory.png", 1.1, 0.1],
     [    1914, "Colonisation", "e/e2/Colonisation_1914.png"],
  //   [    1920, "Colonisation", "4/40/World_1920_empires_colonies_territory.png", 1.02, 0.05],
 //    [    1936, "Colonisation", "2/20/World_1936_empires_colonies_territory.png", 1.02, 0.05],

@@ -4,7 +4,7 @@ var model = require('model');
 
 view.toGrayscale = function(rgb) {
     return 0.21 * rgb[0] + 0.71 * rgb[1] + 0.07* rgb[2];
-}
+};
 
 view.hsvToRgb = function(h, s, v) {
     var hi = ~~(h/60.0);
@@ -28,6 +28,9 @@ view.hsvToRgb = function(h, s, v) {
 
 
 /**
+ * The start time offset and zoom for the main view. Is able to translate
+ * between event times and screen coordinates.
+ * 
  * @constructor
  */
 view.State = function(viewportHeight, border, range) {
@@ -68,13 +71,11 @@ view.State.prototype.zoomTo = function(timeSpan) {
     this.scale = (this.viewportHeight - 2 * this.border) / (timeSpan.end - timeSpan.start);
 };
 
-
 view.State.prototype.zoom = function(y, factor) {
     this.timeOffset = this.yToTime(y);
     this.scale *= factor;
     this.timeOffset += this.yToTime(this.border) - this.yToTime(y);
 };
-
 
 view.State.prototype.setViewportHeight = function(viewportHeight) {
     var oldHeight = this.viewportHeight;
@@ -83,21 +84,28 @@ view.State.prototype.setViewportHeight = function(viewportHeight) {
 };
 
 
-view.Gutter = function(element) {
-    this.element = element;   
+/**
+ * The scale displayed on the left hand side.
+ * 
+ * @constructor
+ * @param {Element} rootElement The root element to render the gutter in.
+ */
+view.Gutter = function(rootElement) {
+    this.rootElement = rootElement;
     this.elements = {};
     this.epoch = 0;
     this.timer = null;
+    this.dirty = false;
+    this.mayAdd = 0;
 };
-
 
 /**
  * Update the gutter. Existing elements are updated immediately; new elements 
  * are added as needed using a timer. No elements are added in the immediate
  * call to avoid animation issues.
  * 
- * We could speed this up further by adding an intermediate div that we
- * can move as a whole if we scroll without zooming. 
+ * It may be feasible to speed this up further by adding an intermediate div 
+ * that can be moved as a whole for scrolling without zooming. 
  * 
  * @param {!view.ViewState} viewState The view state.
  * @param {boolean} opt_add Whether new elements may be added in this call.
@@ -107,8 +115,8 @@ view.Gutter.prototype.update = function(viewState, opt_add) {
         window.clearTimeout(this.timer);
         this.timer = null;
     }
-    
-    var viewportHeight = this.element.offsetHeight;
+
+    var viewportHeight = this.rootElement.offsetHeight;
 
     var idealStepCount = viewportHeight / 100;    
     var idealStep = viewportHeight / idealStepCount;
@@ -120,11 +128,6 @@ view.Gutter.prototype.update = function(viewState, opt_add) {
     
     // start two steps up.
     var t = (Math.round(viewState.timeOffset / timeStep) - 2) * timeStep;
-    var test1 = model.parseTime(model.timeToString(t));
-    var test2 = model.parseTime(model.timeToString(t + timeStep));
-    var useKey = Math.abs(test1 - t) > timeStep / 10 || 
-        Math.abs(test2 - (t + timeStep)) > timeStep;
-    
     this.epoch++;
 
     var subDivision;
@@ -132,29 +135,30 @@ view.Gutter.prototype.update = function(viewState, opt_add) {
     if (pixelStep < 24) {
         timeStep *= 2;
         subDivision = 2;
-        halfDash = "—";re
+        halfDash = "—";
     } else { 
         subDivision = pixelStep > 64 ? 4 : pixelStep > 32 ? 2 : 1; 
     }
     var subStep = 0;
-    var complete = true;
-    var added = 0;
+    this.dirty = false;
+    this.mayAdd = opt_add ? 2 : 0;
     
+    var precision = 1/viewState.scale;
+
     while(true) {
         var key =  "" + t;
         var child = this.elements[key];
         if (!child) {
-            if (!opt_add || added > 2) {
-                complete = false;
-            } else {
-                var child = document.createElement("div");
+            this.dirty = true;
+            if (this.mayAdd > 0) {
+                child = document.createElement("div");
                 child.className = 'timeStep';
-                this.element.appendChild(child);
+                this.rootElement.appendChild(child);
                 this.elements[key] = child;
-                added++;
+                this.mayAdd--;
             }
         } else {
-            child.classList.add('animated');
+            child.classList.add('stable');
         }
         
         var y = Math.round(viewState.timeToY(t));
@@ -162,7 +166,7 @@ view.Gutter.prototype.update = function(viewState, opt_add) {
             var label;
             switch(subStep * (4/subDivision) % 4) {
                 case 0: 
-                    label = (useKey ? key : model.timeToString(t)) + " —";
+                    label = model.timeToString(t, precision) + " —";
                     break;
                 case 2:
                     label = halfDash;
@@ -172,7 +176,7 @@ view.Gutter.prototype.update = function(viewState, opt_add) {
             }
             child.innerHTML = label;
             child.style.top = y - child.offsetHeight / 2;
-            child['_epoch_'] = this.epoch;
+            child.gutterEpoch = this.epoch;
         }
         if (y > viewportHeight) {
             break;
@@ -182,39 +186,59 @@ view.Gutter.prototype.update = function(viewState, opt_add) {
     }
     for (var key in this.elements) {
         var child = this.elements[key];
-        var epoch = child['_epoch_'];
+        var epoch = child.gutterEpoch;
         if (epoch && epoch != this.epoch) {
-            this.element.removeChild(child);
+            this.rootElement.removeChild(child);
             delete this.elements[key];
         }
     }
     
-    if (!complete) {
+    if (this.dirty) {
         var gutter = this;
         this.timer = window.setTimeout(function() {
             gutter.update(viewState, true);
-        }, 20);
+        }, 10);
     }
-    return complete;
 };
 
 
+
 /**
- * @constructor
+ * The main Event Tree.
  * 
+ * @constructor
  * @param {!Element} rootElement
  */
 view.EventTree = function(rootElement, rootEvent) {
     
-    /** @type {!Element} */
+    /** 
+     * The root element the event tree is rendere into.
+     * @type {!Element} 
+     */
     this.rootElement = rootElement;  
     
-    /** @type {!model.Event} */
+    /**
+     * The root timeline event for this event tree.
+     * @type {!model.Event}
+     */
     this.rootEvent = rootEvent;
     
+    /**
+     * Timer id, used to continue updating if the update was incomplete.
+     * @type {?number}
+     */
     this.timer = null;
     
-    this.complete = false;
+    /**
+     * Flag to indicate that this component needs further updating.
+     */
+    this.dirty = false;
+    
+    /** 
+     * Counts up z-indices while draing to make sure the fixed label
+     * is hidden correctly. There must be way to get rid of this....
+     */
+    this.zIndex = 0;
 };
 
 view.EventTree.LABEL_WIDTH = 150;
@@ -223,50 +247,54 @@ view.EventTree.ROT_LABEL_WIDTH = 24;
 view.EventTree.prototype.measureDepth = function(event, viewState) {
     var h = this.rootElement.offsetHeight;
     var min = 1000;
+    var smallCount = 0
     for (var i = 0; i < event.children.length; i++) {
         var child = event.children[i];
         var start = viewState.timeToY(child.start);
         var end = viewState.timeToY(child.end);
         if (end < -h/2 || start > 1.5 * h || start == end) continue;
         if (end - start < view.EventTree.LABEL_WIDTH) {
-            return 0;
+            smallCount++;
         }
         var d = this.measureDepth(child, viewState) + 1;
         if (d < min) {
             min = d;
         }
     }
-    return min;
+    return smallCount < 2 ? min : 0;
 };
 
-view.EventTree.prototype.render = function(viewState, opt_full) {
+view.EventTree.prototype.render = function(viewState, addElements) {
     var w = this.rootElement.offsetWidth;
     var h = this.rootElement.offsetHeight;
     var depth = this.measureDepth(this.rootEvent, viewState);
     if (this.timer) {
         clearTimeout(this.timer);
     }
-
-    this.complete = true;
+    
+    this.zIndex = 0;
+    this.dirty = false;
+    this.mayAdd = addElements ? 2 : 0;
     this.renderNode(
-        viewState, this.rootElement, 0, this.rootEvent, depth, 0.5, w, h, opt_full);
+        viewState, this.rootElement, 0, this.rootEvent, depth, 0.5, w, h);
 
-    if (!this.complete) {
-        var self = this;
+    console.log("dirty: " + this.dirty + " mayAdd: " + this.mayAdd);
+    if (this.dirty) {
+        var eventTree = this;
         this.timer = window.setTimeout(function() {
-            self.render(viewState, true);
-        }, 100);
+            eventTree.render(viewState, true);
+        }, 10);
     }
 };
 
 
 view.EventTree.prototype.renderLeaf = function(
-        viewState, parentElement, parentY, event, hide, timeLimit, width, full) {
+        viewState, parentElement, parentY, event, hide, timeLimit, width, viewportHeight) {
     var y = viewState.timeToY(event.start);
     var top = y - parentY;
 
     var element = document.getElementById(event.id);
-    if (hide) {
+    if (hide || y > viewportHeight) {
         if (element) {
             parentElement.removeChild(element);
         }
@@ -274,38 +302,57 @@ view.EventTree.prototype.renderLeaf = function(
     }
 
     if (!element) {
-        this.complete = false;
-        if (!full) {
+        this.dirty = true;  // still need to change class to stable
+        if (this.mayAdd-- <= 0) {
             return 0;
         }
         element = document.createElement("div");
         element.setAttribute('id', event.id);
         element.className = 'event leaf';
-        element['_event_'] = event;
+        element.eventTreeEvent = event;
         element.innerHTML = event.getHtml();
         parentElement.appendChild(element);
     } else {
-        element.classList.add('animated');
+        element.classList.add('stable');
     }
 
     element.style.top = top;
     element.style.width = width;
-
-    var height = element.offsetHeight;
-    if (viewState.timeToY(event.start) + height > viewState.timeToY(timeLimit)) {
-        parentElement.removeChild(element);
-        return 0;
+    if (!element.heightForWidth) {
+        element.heightForWidth = [];
     }
 
+    var height = element.heightForWidth[width];
+    if (height == null) {
+        element.style.display = 'block';
+        height = element.offsetHeight;
+        element.heightForWidth[width] = height;
+    }
+    if (y + height > viewState.timeToY(timeLimit)) {
+        element.style.display = 'none';
+        return 0;
+    }
+    if (element.style.display == 'none') {
+        element.style.display = 'block';
+        element.classList.remove('stable');
+    }
     return height;
 };
 
 
 view.EventTree.prototype.renderNode = function(
-        viewState, parentElement, parentY, event, collapse, fraction, width, viewportHeight, full) {
+        viewState, parentElement, parentY, event, collapse, fraction, width, viewportHeight) {
     var y = viewState.timeToY(event.start);
     var height = (event.end - event.start) * viewState.scale;
-    
+    var element = document.getElementById(event.id);
+    if (y + height < -viewportHeight/2 ||
+            y > viewportHeight * 1.5) {
+        if (element) {
+            parentElement.removeChild(element);
+        }
+        return;
+    }
+
     if (y < -2 * viewportHeight) {
         var rm = -(y + 2 * viewportHeight);
         y += rm;
@@ -314,24 +361,21 @@ view.EventTree.prototype.renderNode = function(
     if (height > 4 * viewportHeight) {
         height = 4 * viewportHeight;
     } 
-    
+
     var top = y - parentY;
     var count = event.children.length;
-
-    var element = document.getElementById(event.id);
-    var textTop = y < 0 ? -y : 0;
 
     var labelDiv;
     var containerDiv; 
     if (!element) {
-        this.complete = false;
-        if (!full) {
+        this.dirty = true;
+        if (this.mayAdd-- <= 0) {
             return;
         }
         element = document.createElement("div");
         element.setAttribute('id', event.id);
         element.className = 'event node';
-        element['_event_'] = event;
+        element.eventTreeEvent = event;
         labelDiv = document.createElement("div");
         labelDiv.className = 'text';
         labelDiv.innerHTML = event.getHtml();
@@ -358,15 +402,22 @@ view.EventTree.prototype.renderNode = function(
     } else {
         labelDiv = element.firstChild;
         containerDiv = labelDiv.nextSibling;
-        element.classList.add('animated');
-        labelDiv.classList.add('animated');
-        containerDiv.classList.add('animated');
+        element.classList.add('stable');
+        labelDiv.classList.add('stable');
+        containerDiv.classList.add('stable');
     }
-    
+
+    if (y < 0) {
+        labelDiv.style.position = 'fixed';
+    } else {
+        labelDiv.style.position = 'relative';
+    }
+
     element.style.top = top;
     element.style.width = width;
     element.style.height = height;
-   
+    element.style.zIndex = this.zIndex++;
+
     var labelWidth;
     if (event === this.rootEvent) {
         labelWidth = 0;
@@ -375,11 +426,11 @@ view.EventTree.prototype.renderNode = function(
         labelWidth = view.EventTree.ROT_LABEL_WIDTH;
         labelDiv.style.width = height;
         labelDiv.style.height = labelWidth;
-        labelDiv.style.top = textTop + height;
+        labelDiv.style.top = height;
     } else {
         labelDiv.className = "label";
         labelWidth = view.EventTree.LABEL_WIDTH;
-        labelDiv.style.top = textTop;
+        labelDiv.style.top = 0;
         labelDiv.style.width = labelWidth;
         labelDiv.style.height = height;
     }
@@ -390,9 +441,7 @@ view.EventTree.prototype.renderNode = function(
 
     if (containerWidth < view.EventTree.LABEL_WIDTH || height < 50 || 
             y + height/2 < -viewportHeight || y > 1.5 * viewportHeight) {
-        if (containerDiv) {
-            containerDiv.innerHTML = "";
-        }
+        containerDiv.innerHTML = "";
         return height;
     }
     
@@ -400,7 +449,7 @@ view.EventTree.prototype.renderNode = function(
         console.log("Fetching Wikipedia data for " + event.description);
         var self = this;
         event.fetchData(function(){
-            self.render(viewState);    
+            self.render(viewState);
         });
     }
     
@@ -413,7 +462,9 @@ view.EventTree.prototype.renderNode = function(
             childTimeLimit = event.end;
             for (var j = i + 1; j < count; j++) {
                 var childJ = event.children[j];
-                if (childJ.start != childJ.end || document.getElementById(childJ.id)) {
+                if (childJ.start != childJ.end || 
+                    (document.getElementById(childJ.id) &&
+                     document.getElementById(childJ.id).style.display != 'none')) {
                     childTimeLimit = Math.min(childJ.start, childTimeLimit);
                     break;
                 }
@@ -424,13 +475,13 @@ view.EventTree.prototype.renderNode = function(
 
         if (child.start == child.end) {
             var height = this.renderLeaf(
-                viewState, containerDiv, y, child, hide, childTimeLimit, containerWidth, full);
+                viewState, containerDiv, y, child, hide, childTimeLimit, containerWidth, viewportHeight);
             if (height != 0) {
                 filledToTime = viewState.yToTime(viewState.timeToY(child.start) + height);
             } 
         } else {
             this.renderNode(
-                viewState, containerDiv, y, child, collapse - 1, i / (count + 1),  containerWidth, viewportHeight, full);
+                viewState, containerDiv, y, child, collapse - 1, i / (count + 1),  containerWidth, viewportHeight);
             filledToTime = child.end;
         }
     }

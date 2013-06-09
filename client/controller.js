@@ -1,17 +1,13 @@
 var model = require('model');
-var string = require('string');
 var data = require('data');
 var quirks = require('quirks');
 var wiki = require('wiki');
 var gutter = new view.Gutter(document.getElementById('gutter'));
 var view = require('view');
 
-var wikiFrame = document.getElementById('wikiFrame');
-
 var ZOOM_FACTOR = 1.1;
-var BORDER = 10;
-
-var showZoom = false;
+var BORDER = 16;
+var MAX_SCALE = 500;
 
 var timePointer = document.getElementById("timepointer");
 
@@ -32,6 +28,8 @@ function fixBounds() {
                         (rootEvent.end - rootEvent.start);
     if (viewState.scale < minScale) {
         viewState.scale = minScale;
+    } else if (viewState.scale > MAX_SCALE) {
+        viewState.scale = MAX_SCALE;
     }
     if (viewState.timeOffset < rootEvent.start) {
         viewState.timeOffset = rootEvent.start;
@@ -49,7 +47,8 @@ function update(smooth) {
         window.clearTimeout(resetTimer);
     }
     if (viewState.scale < (viewState.viewportHeight - 2 * BORDER) / 
-                            (rootEvent.end - rootEvent.start)) {
+                            (rootEvent.end - rootEvent.start) ||
+        viewState.scale > MAX_SCALE) {
         resetTimer = window.setTimeout(function() {
             fixBounds();
             resetTimer = null;
@@ -58,17 +57,21 @@ function update(smooth) {
     } else {
         fixBounds();
     }
-    
-    gutter.element.className = eventTree.rootElement.className = smooth ? "smooth" : "";
+
+    if (smooth) {
+        gutter.rootElement.classList.add('smooth');
+        eventTree.rootElement.classList.add('smooth');
+    } else {
+        gutter.rootElement.classList.remove('smooth');
+        eventTree.rootElement.classList.remove('smooth');
+    }
 
     var w = eventTree.rootElement.offsetWidth;
     var h = eventTree.rootElement.offsetHeight;
     eventTree.rootElement.style.height = h + "px";
     
     gutter.update(viewState);
-    
     updateTimePointer();
-    
     eventTree.render(viewState);
 }
 
@@ -78,10 +81,15 @@ function updateTimePointer() {
     timePointer.style.top = lastMouseY - timePointer.offsetHeight / 2;
     var time = viewState.yToTime(lastMouseY);
     
-    timePointer.innerHTML = (showZoom ? 
-        '|<span id="reset">&nbsp;&times;&nbsp;</span>' + 
-        '|<span id="zoomOut">&nbsp;&minus;&nbsp;</span>' + 
-        '|<span id="zoomIn">&nbsp;&plus;&nbsp;</span>|' : model.timeToString(time)) + " —";
+    var timeString = model.timeToString(time, 1/viewState.scale);
+    var timeUnit = '';
+    if (/Ma$/.test(timeString)) {
+        timeUnit = 'Ma';
+        timeString = timeString.substr(0, timeString.length - 3);
+    }
+    
+    document.getElementById("time").innerHTML = timeString;
+    document.getElementById("timeUnit").innerHTML = timeUnit;
     
     // use binary search!
     var index = 0;
@@ -102,19 +110,29 @@ function updateTimePointer() {
     var scale = globeData[3] ? globeData[3] : 1;
     var offset = globeData[4] ? globeData[4] : 0;
     var backgroundColor = globeData[5] ? globeData[5] : "#fff";
+    
+    // Make this dynamically depending on the RHS size.
+    var requestSize;
+    if (scale == 0.5) {
+        requestSize = 160;
+    } else if (scale != 1) {
+        requestSize = 640;
+    } else {
+        requestSize = 320;
+    }
 
     var cut = imageName.lastIndexOf('/');
     var link = wiki.getUrl('File:' + imageName.substr(cut + 1));
 
     var imageUrl = "http://upload.wikimedia.org/wikipedia/commons/thumb/" + 
-        imageName + "/320px-" + imageName.substr(cut + 1);
+        imageName + "/"+requestSize +"px-" + imageName.substr(cut + 1);
 
     var globeElement = document.getElementById("globe");
     var globeLabelElement = document.getElementById("globeLabel");
 
     globeElement.style.backgroundColor = backgroundColor;
     globeElement.style.backgroundImage = "url('" + imageUrl + "')";
-    var size =  Math.floor(scale * 320)
+    var size =  Math.floor(scale * 320);
     globeElement.style.backgroundSize = size + "px";
     globeElement.style.backgroundPosition = Math.floor((globeElement.offsetWidth - size) / 2 + 320 * offset) + "px 50%";
     
@@ -130,7 +148,7 @@ function updateTimePointer() {
 
 //timelineElement.addEventListener('DOMMouseScroll', onMouseWheel, false);  
 eventTree.rootElement.addEventListener("mousewheel", onMouseWheel, false);
-gutter.element.addEventListener("mousewheel", onMouseWheel, false);
+gutter.rootElement.addEventListener("mousewheel", onMouseWheel, false);
 
 document.body.onclick = function(event) {
     var element = event.target;
@@ -139,11 +157,14 @@ document.body.onclick = function(event) {
     }
     var done = true;
     switch(element.id) {
+        case 'metaTab':
+            showTab('meta');
+            break;
         case 'wikipediaTab':
-            showWikipedia('');
+            showTab('wikipedia');
             break;
         case 'contextTab':
-            showWikipedia(null);
+            showTab('context');
             break;
         case 'zoomIn':
             viewState.zoom(event.clientY, 1.3);
@@ -166,7 +187,7 @@ document.body.onclick = function(event) {
     }
     while (element) {
         var href = element.getAttribute("href");
-        var e = element['_event_'];
+        var e = element.eventTreeEvent;
         if (href) {
             if (/wikipedia\.org\/wiki\//.test(href)) {
                 var cut = href.lastIndexOf('/');
@@ -190,20 +211,28 @@ document.body.onclick = function(event) {
 }
 
 
-function showWikipedia(title) {
-    wikiFrame.style.display = title != null ? "block" : "none";
-    document.getElementById("context").style.display = title != null ? "none" : "block";
+function showTab(name) {
+    document.getElementById("contextTab").classList.remove("active");
+    document.getElementById("metaTab").classList.remove("active");
+    document.getElementById("wikipediaTab").classList.remove("active");
+
+    document.getElementById("contextCard").style.display = 'none';
+    document.getElementById("metaCard").style.display = 'none';
+    document.getElementById("wikipediaCard").style.display = 'none';
+
+    document.getElementById(name + "Tab").classList.add('active');
+    document.getElementById(name + "Card").style.display = 'block';
     
-    if (title != null) {
-        document.getElementById("wikipediaTab").classList.add("active");
-        document.getElementById("contextTab").classList.remove("active");
-        if (title) {
-            wikiFrame.src = "http://en.m.wikipedia.org/wiki/"+ title;  
-        }
-    } else {
-        document.getElementById("wikipediaTab").classList.remove("active");
-        document.getElementById("contextTab").classList.add("active");
+    if (name == 'context') {
+        globeIndex = -1;
+        updateTimePointer();
     }
+}
+
+
+function showWikipedia(title) {
+    showTab('wikipedia');
+    document.getElementById('wikipediaCard').src = "http://en.m.wikipedia.org/wiki/"+ title;  
 }
 
 
@@ -249,9 +278,10 @@ function onMouseWheel(e) {
     update();
 }
 
-document.onmousemove = function(event) {
+
+document.getElementById('timeline').onmousemove = function(event) {
     lastMouseY = event.clientY;
-    showZoom = event.clientX < gutter.element.offsetWidth;
+    showZoom = event.clientX < gutter.rootElement.offsetWidth;
     updateTimePointer();
 };
 
