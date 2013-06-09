@@ -8,6 +8,9 @@ var wiki = require('wiki');
  */
 model.nextId = 0;
 
+model.MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
 /**
  * Parses the given time to a number.
  * @param {string} s
@@ -56,11 +59,17 @@ model.parseTime = function(s) {
  * Converts the given time to a string.
  * @param {number} time
  */
-model.timeToString = function(time) {
+model.timeToString = function(time, opt_precision) {
     if (time < -100000) {
         return "" + ((time-2013) / -1000000.0).toFixed(2) + " Ma";
-    } 
-    return "" + time.toFixed(0);
+    }
+    
+    var year = Math.floor(time);
+    if (year != time && time > 0) {
+        var index = Math.floor((time - year) * 12)
+        return model.MONTHS[index] + ". " + year;
+    }
+    return "" + year;
 };
 
 model.DASHES = ['–', '-', '—', ' to ', '&mdash;']

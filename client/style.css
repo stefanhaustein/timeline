@@ -54,27 +54,29 @@ body {
     overflow: hidden;
 }
 #eventTree .animated {
-    transition: left 0.5s;
-    -webkit-transition: left 0.5s;
+    transition: left 0.5s, opacity 0.5s;
+    -webkit-transition: left 0.5s opacity 0.5s;
+}
+#eventTree .event.animated {
+    opacity: 1;
 }
 #eventTree.smooth .animated, #gutter.smooth .animated {
     transition: top 0.5s, height 0.5s, left 0.5s, width 0.5s;
   -webkit-transition: top 0.5s, height 0.5s, left 0.5s, width 0.5s;
 }
-#eventTree .span {
-    overflow:hidden; 
+#eventTree .event {
+    overflow: hidden; 
     position: absolute;
+    opacity: 0;
 }
 #eventTree .container {
     position:absolute;
-    top:0;
+    top: 0;
     height: 100%;
 }
 #eventTree .leaf {
     /*border-top:1px solid black;*/
-    overflow: hidden;
     padding: 3px 3px 3px 24px;
-    position: absolute;
     text-indent: -20px;
     text-overflow: ellipsis;
 }
@@ -121,10 +123,15 @@ body {
     padding: 10px;
 }
 
-#imageContainer {
+#globe {
+    display: block;
+    height: 100%;
+    width: 100%;
     border: 1px solid black;
+    background-repeat:no-repeat;
+    background-position: center center;
 }
-#imageSubtitle {
+#globeLabel {
     text-align:center;
 }
 #tabs {

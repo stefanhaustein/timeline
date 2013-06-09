@@ -72,6 +72,8 @@ function update(smooth) {
     eventTree.render(viewState);
 }
 
+var globeIndex = -1;
+
 function updateTimePointer() {
     timePointer.style.top = lastMouseY - timePointer.offsetHeight / 2;
     var time = viewState.yToTime(lastMouseY);
@@ -87,31 +89,40 @@ function updateTimePointer() {
     while (index + 1 < count && data.GLOBES[index + 1][0] < time) {
         index++;
     }
+    
+    if (globeIndex == index) {
+        return;
+    }
+    globeIndex = index;
+    
     var globeData = data.GLOBES[index];
     var imageTime = globeData[0];
     var imageLabel = globeData[1];
     var imageName = globeData[2];
-    var backgroundColor = globeData[3]  ? "black" : "white";
-    var scale = globeData[4] ? globeData[4] : 1;
+    var scale = globeData[3] ? globeData[3] : 1;
+    var offset = globeData[4] ? globeData[4] : 0;
+    var backgroundColor = globeData[5] ? globeData[5] : "#fff";
 
-    var imageContainerElement = document.getElementById("imageContainer");
-    var earthImageLinkElement = document.getElementById("earthImageLink");
-    var earthImageElement = document.getElementById("earthImage");
-    var earthImageSubtitleElement = document.getElementById("imageSubtitle");
-
-    imageContainerElement.style.backgroundColor = backgroundColor;
-
-    var width = 320 * scale;
     var cut = imageName.lastIndexOf('/');
     var link = wiki.getUrl('File:' + imageName.substr(cut + 1));
 
-    earthImageElement.src = 
-        "http://upload.wikimedia.org/wikipedia/commons/thumb/" + 
-        imageName + "/" + width + "px-" + imageName.substr(cut + 1);
-    earthImageLinkElement.href = link;
-    earthImageSubtitleElement.innerHTML = 
+    var imageUrl = "http://upload.wikimedia.org/wikipedia/commons/thumb/" + 
+        imageName + "/320px-" + imageName.substr(cut + 1);
+
+    var globeElement = document.getElementById("globe");
+    var globeLabelElement = document.getElementById("globeLabel");
+
+    globeElement.style.backgroundColor = backgroundColor;
+    globeElement.style.backgroundImage = "url('" + imageUrl + "')";
+    var size =  Math.floor(scale * 320)
+    globeElement.style.backgroundSize = size + "px";
+    globeElement.style.backgroundPosition = Math.floor((globeElement.offsetWidth - size) / 2 + 320 * offset) + "px 50%";
+    
+
+    globeElement.href = link;
+    globeLabelElement.innerHTML = 
         imageLabel + ' ' + model.timeToString(imageTime);
-    earthImageSubtitleElement.href = link;
+    globeLabelElement.href = link;
 }
 
 // Event handlers 
@@ -197,10 +208,9 @@ function showWikipedia(title) {
 
 
 function move(y, delta) {
-    console.log("bottom time: " + viewState.yToTime(eventTree.rootElement.offsetHeight));
     if (delta < 0 && viewState.timeOffset <= rootEvent.start ) {
         viewState.zoom(BORDER, 1.1);
-    } else if (delta > 0 && viewState.yToTime(viewState.viewportHeight - BORDER) >= rootEvent.end) {
+    } else if (delta > 0 && viewState.yToTime(viewState.viewportHeight - BORDER + 1) >= rootEvent.end) {
         viewState.zoom(viewState.viewportHeight - BORDER, 1.1);
     } else {
         viewState.timeOffset += delta / viewState.scale;
@@ -209,7 +219,6 @@ function move(y, delta) {
 
 
 window.onresize = function(e) {
-    console.log(e);
     eventTree.rootElement.style.height = window.innerHeight;
     viewState.setViewportHeight(window.innerHeight);
     update();

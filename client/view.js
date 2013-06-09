@@ -211,6 +211,10 @@ view.EventTree = function(rootElement, rootEvent) {
     
     /** @type {!model.Event} */
     this.rootEvent = rootEvent;
+    
+    this.timer = null;
+    
+    this.complete = false;
 };
 
 view.EventTree.LABEL_WIDTH = 150;
@@ -233,27 +237,36 @@ view.EventTree.prototype.measureDepth = function(event, viewState) {
         }
     }
     return min;
-}
+};
 
-view.EventTree.prototype.render = function(viewState) {
+view.EventTree.prototype.render = function(viewState, opt_full) {
     var w = this.rootElement.offsetWidth;
     var h = this.rootElement.offsetHeight;
     var depth = this.measureDepth(this.rootEvent, viewState);
-    
-    window.console.log("render; w: " + w + " H: " +h);
-    
-    this.renderEvent(
-        viewState, this.rootElement, 0, this.rootEvent, depth, 0.5, w, h);
+    if (this.timer) {
+        clearTimeout(this.timer);
+    }
+
+    this.complete = true;
+    this.renderNode(
+        viewState, this.rootElement, 0, this.rootEvent, depth, 0.5, w, h, opt_full);
+
+    if (!this.complete) {
+        var self = this;
+        this.timer = window.setTimeout(function() {
+            self.render(viewState, true);
+        }, 100);
+    }
 };
 
 
 view.EventTree.prototype.renderLeaf = function(
-        viewState, parentElement, parentY, event, overlap, timeLimit, width) {
+        viewState, parentElement, parentY, event, hide, timeLimit, width, full) {
     var y = viewState.timeToY(event.start);
     var top = y - parentY;
 
     var element = document.getElementById(event.id);
-    if (overlap) {
+    if (hide) {
         if (element) {
             parentElement.removeChild(element);
         }
@@ -261,9 +274,13 @@ view.EventTree.prototype.renderLeaf = function(
     }
 
     if (!element) {
+        this.complete = false;
+        if (!full) {
+            return 0;
+        }
         element = document.createElement("div");
         element.setAttribute('id', event.id);
-        element.className = 'leaf';
+        element.className = 'event leaf';
         element['_event_'] = event;
         element.innerHTML = event.getHtml();
         parentElement.appendChild(element);
@@ -273,11 +290,10 @@ view.EventTree.prototype.renderLeaf = function(
 
     element.style.top = top;
     element.style.width = width;
-    element.style.display = "block";
 
     var height = element.offsetHeight;
     if (viewState.timeToY(event.start) + height > viewState.timeToY(timeLimit)) {
-        element.style.display = "none";
+        parentElement.removeChild(element);
         return 0;
     }
 
@@ -285,8 +301,8 @@ view.EventTree.prototype.renderLeaf = function(
 };
 
 
-view.EventTree.prototype.renderEvent = function(
-        viewState, parentElement, parentY, event, collapse, fraction, width, viewportHeight) {
+view.EventTree.prototype.renderNode = function(
+        viewState, parentElement, parentY, event, collapse, fraction, width, viewportHeight, full) {
     var y = viewState.timeToY(event.start);
     var height = (event.end - event.start) * viewState.scale;
     
@@ -308,9 +324,13 @@ view.EventTree.prototype.renderEvent = function(
     var labelDiv;
     var containerDiv; 
     if (!element) {
+        this.complete = false;
+        if (!full) {
+            return;
+        }
         element = document.createElement("div");
         element.setAttribute('id', event.id);
-        element.className = event.start == event.end ? 'event' : 'span';
+        element.className = 'event node';
         element['_event_'] = event;
         labelDiv = document.createElement("div");
         labelDiv.className = 'text';
@@ -336,9 +356,11 @@ view.EventTree.prototype.renderEvent = function(
         element.style.borderColor = element.style.color = 
             (rgb && view.toGrayscale(rgb) < 48) ? "#ccc" : "#333";
     } else {
-        element.classList.add('animated');
         labelDiv = element.firstChild;
         containerDiv = labelDiv.nextSibling;
+        element.classList.add('animated');
+        labelDiv.classList.add('animated');
+        containerDiv.classList.add('animated');
     }
     
     element.style.top = top;
@@ -382,7 +404,7 @@ view.EventTree.prototype.renderEvent = function(
         });
     }
     
-    var filledTo = 0;
+    var filledToTime = event.start; 
     var childTimeLimit = event.start;
     for (var i = 0; i < count; i++) {
         var child = event.children[i];
@@ -391,28 +413,26 @@ view.EventTree.prototype.renderEvent = function(
             childTimeLimit = event.end;
             for (var j = i + 1; j < count; j++) {
                 var childJ = event.children[j];
-                if (childJ.start != childJ.end) {
+                if (childJ.start != childJ.end || document.getElementById(childJ.id)) {
                     childTimeLimit = Math.min(childJ.start, childTimeLimit);
                     break;
                 }
             }
         }
 
-        var childOverlap = filledTo > viewState.timeToY(child.start);
+        var hide = filledToTime > child.start;
 
-        var childHeight;
-        
         if (child.start == child.end) {
-            childHeight = this.renderLeaf(
-                viewState, containerDiv, y, child, childOverlap, childTimeLimit, containerWidth);
+            var height = this.renderLeaf(
+                viewState, containerDiv, y, child, hide, childTimeLimit, containerWidth, full);
+            if (height != 0) {
+                filledToTime = viewState.yToTime(viewState.timeToY(child.start) + height);
+            } 
         } else {
-            childHeight = this.renderEvent(
-                viewState, containerDiv, y, child, collapse - 1, i / (count + 1),  containerWidth, viewportHeight);
-        }
-        if (!childOverlap && childHeight != 0) {
-            filledTo = viewState.timeToY(child.start) + childHeight;
+            this.renderNode(
+                viewState, containerDiv, y, child, collapse - 1, i / (count + 1),  containerWidth, viewportHeight, full);
+            filledToTime = child.end;
         }
     }
-    return height;
 };
 
