@@ -112,8 +112,8 @@ data.GLOBES = [
 
 // start,       o2,  co2, tmp, sea, image
 data.ENVIRONMENT = [
-    [-13000e6, null, null,null,null],
-    [-635.0e6,  8.0, 4500,null,null],
+    [-13000e6,  NaN,  NaN, NaN, NaN],
+    [-635.0e6,  8.0, 4500, NaN, NaN],
     [-541.0e6, 12.5, 4500,  21,  60],
     [-485.4e6, 13.5, 4200,  16, 180],
     [-443.4e6, 14.0, 4500,  17, 180],

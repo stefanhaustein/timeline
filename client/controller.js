@@ -75,12 +75,9 @@ function update(smooth) {
     eventTree.render(viewState);
 }
 
-var globeIndex = -1;
 
-function updateTimePointer() {
-    timePointer.style.top = lastMouseY - timePointer.offsetHeight / 2;
-    var time = viewState.yToTime(lastMouseY);
-    
+// use binary search in both cases below!
+function updateTable(time) {
     var timeString = model.timeToString(time, 1/viewState.scale);
     var timeUnit = '';
     if (/Ma$/.test(timeString)) {
@@ -91,10 +88,35 @@ function updateTimePointer() {
     document.getElementById("time").innerHTML = timeString;
     document.getElementById("timeUnit").innerHTML = timeUnit;
     
-    // use binary search!
+    
+    var index = -1;
+    var count = data.ENVIRONMENT.length;
+    while (index + 1 < count && data.ENVIRONMENT[index + 1][0] <= time) {
+        index++;
+    }
+    var startData = index == -1 ? [NaN, NaN, NaN, NaN, NaN] : data.ENVIRONMENT[index];
+    var endData = index == count ? startData : data.ENVIRONMENT[index + 1];
+    
+    // interpolate.
+    var fraction = (time - startData[0]) / (endData[0] - startData[0]);
+    
+    var interpolated = [];
+    for (var i = 0; i < startData.length; i++) {
+        interpolated[i] = startData[i] * (1-fraction) + endData[i] * fraction;
+    }
+
+    document.getElementById("o2").innerHTML = interpolated[1].toFixed(1);
+    document.getElementById("co2").innerHTML = interpolated[2].toFixed(1);
+    document.getElementById("temperature").innerHTML = interpolated[3].toFixed(1);
+    document.getElementById("seaLevel").innerHTML = interpolated[4].toFixed(1);
+}
+
+
+var globeIndex = -1;
+function updateGlobe(time) {
     var index = 0;
     var count = data.GLOBES.length;
-    while (index + 1 < count && data.GLOBES[index + 1][0] < time) {
+    while (index + 1 < count && data.GLOBES[index + 1][0] <= time) {
         index++;
     }
     
@@ -134,14 +156,25 @@ function updateTimePointer() {
     globeElement.style.backgroundImage = "url('" + imageUrl + "')";
     var size =  Math.floor(scale * 320);
     globeElement.style.backgroundSize = size + "px";
-    globeElement.style.backgroundPosition = Math.floor((globeElement.offsetWidth - size) / 2 + 320 * offset) + "px 50%";
-    
+    globeElement.style.backgroundPosition = 
+        Math.floor((globeElement.offsetWidth - size) / 2 + 320 * offset) + "px 50%";
 
     globeElement.href = link;
     globeLabelElement.innerHTML = 
         imageLabel + ' ' + model.timeToString(imageTime);
     globeLabelElement.href = link;
+
 }
+
+
+function updateTimePointer() {
+    timePointer.style.top = lastMouseY - timePointer.offsetHeight / 2;
+    var time = viewState.yToTime(lastMouseY);
+    
+    updateTable(time);
+    updateGlobe(time);
+}
+
 
 // Event handlers 
 
