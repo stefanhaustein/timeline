@@ -278,7 +278,6 @@ view.EventTree.prototype.render = function(viewState, addElements) {
     this.renderNode(
         viewState, this.rootElement, 0, this.rootEvent, depth, 0.5, w, h);
 
-    console.log("dirty: " + this.dirty + " mayAdd: " + this.mayAdd);
     if (this.dirty) {
         var eventTree = this;
         this.timer = window.setTimeout(function() {

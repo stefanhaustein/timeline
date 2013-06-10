@@ -95,11 +95,10 @@ function updateTable(time) {
         index++;
     }
     var startData = index == -1 ? [NaN, NaN, NaN, NaN, NaN] : data.ENVIRONMENT[index];
-    var endData = index == count ? startData : data.ENVIRONMENT[index + 1];
+    var endData = index + 1 == count ? startData : data.ENVIRONMENT[index + 1];
     
     // interpolate.
-    var fraction = (time - startData[0]) / (endData[0] - startData[0]);
-    
+    var fraction = index + 1 == count ? 0.5 : (time - startData[0]) / (endData[0] - startData[0]);
     var interpolated = [];
     for (var i = 0; i < startData.length; i++) {
         interpolated[i] = startData[i] * (1-fraction) + endData[i] * fraction;
