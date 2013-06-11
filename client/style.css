@@ -6,6 +6,12 @@ a:link, a:hover, a:active, a:visited { color: inherit; }
 
 body {
     height:100%;
+    background: -moz-linear-gradient( #666, #fff);
+    background: -ms-linear-gradient( #666, #fff);
+    background: -o-linear-gradient( #666, #fff);
+    background: -webkit-linear-gradient( #666, #fff);
+    background: linear-gradient( #666, #fff);
+
 }
 
 html, body, td, div, tr, table {
@@ -18,7 +24,6 @@ html, body, td, div, tr, table {
 }
 
 #gutter {
-    background: linear-gradient( #666, #fff);
     border-right: 1px solid black;
     height: 100%;
     width: 120px;
@@ -42,10 +47,9 @@ html, body, td, div, tr, table {
     bottom:0;
 }
 
-#timepointer a {
-    text-decoration: none;
-}
+
 #timepointer {
+    vertical-align:middle;
     padding: 5px 0 5px 0;
     width:100%;
     position:relative;
@@ -53,14 +57,30 @@ html, body, td, div, tr, table {
     color:white;
     background-color:red;
     z-index:1;
+    height: 30px;
+    cursor: default;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none
 }
 
+
+#timepointer:hover .time,
+#timepointer .control {
+    display: none;
+}
+
+#timepointer .time,
+#timepointer:hover .control {
+    display: inline;
+}
 
 
 /** eventTree */
 
 #eventTree {
-    background: linear-gradient( #666, #fff);
     height: 100%;
     position: relative;
     overflow: hidden;
@@ -98,11 +118,6 @@ html, body, td, div, tr, table {
     overflow: hidden;
     position: relative;
     text-overflow: ellipsis;
-        /*    -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none */;
     height: 100%;
 }
 #eventTree .label.rot {
@@ -125,7 +140,6 @@ html, body, td, div, tr, table {
     float: right;
 }
 #tabs {
-    background-color: #666;
     height: 32px;
 }
 .tab {
@@ -135,11 +149,16 @@ html, body, td, div, tr, table {
 }
 .tab.active {
     background-color: #fff;
+    font-weight: bold;
 }
 
 .card {
     height: 100%;
     overflow: auto;
+    background-color:#fff;
+}
+.card.active {
+    display: block;
 }
 
 #contextCard {

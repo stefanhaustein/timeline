@@ -79,15 +79,26 @@ function update(smooth) {
 // use binary search in both cases below!
 function updateTable(time) {
     var timeString = model.timeToString(time, 1/viewState.scale);
+    document.getElementById("timepointerTime").innerHTML = timeString + ' &mdash;';
     var timeUnit = '';
     if (/Ma$/.test(timeString)) {
         timeUnit = 'Ma';
         timeString = timeString.substr(0, timeString.length - 3);
     }
     
-    document.getElementById("time").innerHTML = timeString;
+    document.getElementById("tableTime").innerHTML = timeString;
     document.getElementById("timeUnit").innerHTML = timeUnit;
-    
+
+    var timePercent = 100 - 100 * (time-rootEvent.start) / (rootEvent.end - rootEvent.start);
+    if (timePercent < 0) {
+        timePercent = 0;
+    } else if (timePercent > 100) {
+        timePercent = 100;
+    }
+    timePercent = timePercent.toPrecision(3);
+    document.getElementById("timePercent").innerHTML = timePercent;
+
+
     
     var index = -1;
     var count = data.ENVIRONMENT.length;
@@ -221,7 +232,7 @@ document.body.onclick = function(event) {
         var href = element.getAttribute("href");
         var e = element.eventTreeEvent;
         if (href) {
-            if (/wikipedia\.org\/wiki\//.test(href)) {
+            if (/wikipedia\.org\/wiki\//.test(href) && href.indexOf("File:") == -1) {
                 var cut = href.lastIndexOf('/');
                 showWikipedia(href.substr(cut + 1));
             } else {
@@ -336,10 +347,4 @@ document.onkeydown = function(event) {
     update(event.clientY);
 };
 
-
 update();
-
-// startup
-
-
-

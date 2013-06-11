@@ -23,10 +23,11 @@
 
                     <!-- Finally, a HTML table used for rendering an actual table! -->
                     <table class="dataTable">
-                        <tr><td>Time</td><td class="data" id="time">n/a</td><td id="timeUnit" width="50px"></td></tr>
+                        <tr><td>Time</td><td class="data" id="tableTime">n/a</td><td id="timeUnit" width="50px"></td></tr>
+                        <tr><td>Relative age</td><td class="data" id="timePercent">n/a</td><td>%</td></tr>
                         <tr><td>Athmospheric O<sub>2</sub></td><td class="data" id="o2">n/a</td><td>Vol %</td></tr>
                         <tr><td>Athmospheric CO<sub>2</sub></td><td class="data" id="co2">n/a</td><td>ppm</td></tr>
-                        <tr><td>Surface Temperature</td><td class="data" id="temperature">n/a</td><td>°C</td></tr>
+                        <tr><td>Surface Temperature</td><td class="data" id="temperature">n/a</td><td>&deg;C</td></tr>
                         <tr><td>Sea Level</td><td class="data" id="seaLevel">n/a</td><td>m</td></tr>
                         <tr><td>Population</td><td class="data" id="population">n/a</td><td id="populationUnit"></td></tr>
                     </table>
@@ -36,14 +37,22 @@
                     <p><b>About Timeline</b></p>
                     <p>This project pulls timelines from Wikipedia, parses them
                         and puts them into a coherent zoomable view. This is
-                        mostly inspired by "<a href="http://htwins.net/scale2/">The Scale of the Universe</a>".
+                        mostly inspired by Huang's great Flash app "The Scale of the Universe"
+                        and George Santayana's famous quote.
                         </p>
+                    <p>I have tested this only in Chrome so far.</p>
+                    <p>Use the scroll wheel togehter with the shift key to zoom in or out. '+', '-' and the cursor
+                       keys should also work.
+                    </p>
+                    <p>"Ma" stands for "Million years ago".</p>
                     <p>The source code is available at 
                         <a href='https://github.com/stefanhaustein/timeline'>github.com/stefanhaustein/timeline</a>.</p>
                     <p>Features I'd like to add:</p>
                     <ol>
+                        <li>Limit events to <b>one line</b> unless there is more space available;
+                            this should also simplify some calculations. Show the full text on hover.</li>
+                        <li>Add support for <b>dragging</b> the timeline and gutter</li>
                         <li>Make time spans <b>linkable</b> using url fragments and remove the corresponding click handler</li>
-                        <li>Limit events to one line unless there is more space available; this should also simplify some calculations. Show the full text on hover.</li>
                         <li>Automatically zoom out when srolling into "boring" regions</li>
                         <li>Make it possible to change the sizes of the main panel and the side panel</li>
                         <li>Add background <b>photos</b> (moon landing etc.) to data.js and render them in the time scale on the left side (in a way that looks good and not cluttered)</li>
@@ -57,7 +66,6 @@
                         <li>Blend the maps into each other at boundaries</li>
                         <li>Some kind of <b>weighting</b>, so more important events shou up first (no idea how to do this automatically yet)</li>
                         <li>Full <b>touch</b> support</li>
-                        <li>Add support for <b>dragging</b> the timeline and gutter</li>
                         <li>Better automatic title rotation</li>
                         <li>More graceful degradation for <b>small screens</b></li>
                         <li>Test on <b>more browsers</b>, in particular scroll wheel speed</li>
@@ -70,8 +78,10 @@
     </table>
     <div id="timeline">
         <div id="gutter" >
-            <div id="timepointer">
-                <span id="reset">reset&nbsp;</span>|<span id="zoomOut">&nbsp;&minus;&nbsp;</span>|<span id="zoomIn">&nbsp;&plus;&nbsp;</span>| —</div>
+            <div id="timepointer"><div class="time" id="timepointerTime"></div><div class="control"
+              ><span id="reset">&nbsp;&times;&nbsp;</span><span id="zoomOut">&nbsp;&minus;&nbsp;</span><span id="zoomIn"
+              >&nbsp;&plus;&nbsp;</span>&nbsp;&mdash;</span></div>
+            </div>
         </div>
         <div id="eventTree"></div>
     </div>

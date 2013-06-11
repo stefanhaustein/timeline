@@ -131,11 +131,11 @@ view.Gutter.prototype.update = function(viewState, opt_add) {
     this.epoch++;
 
     var subDivision;
-    var halfDash = "–";
+    var halfDash = "&ndash;";
     if (pixelStep < 24) {
         timeStep *= 2;
         subDivision = 2;
-        halfDash = "—";
+        halfDash = "&mdash;";
     } else { 
         subDivision = pixelStep > 64 ? 4 : pixelStep > 32 ? 2 : 1; 
     }
@@ -166,7 +166,7 @@ view.Gutter.prototype.update = function(viewState, opt_add) {
             var label;
             switch(subStep * (4/subDivision) % 4) {
                 case 0: 
-                    label = model.timeToString(t, precision) + " —";
+                    label = model.timeToString(t, precision) + " &mdash;";
                     break;
                 case 2:
                     label = halfDash;
