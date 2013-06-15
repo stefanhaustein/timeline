@@ -1,26 +1,29 @@
+// Imports
+
 var model = require('model');
 var data = require('data');
 var quirks = require('quirks');
 var wiki = require('wiki');
-var gutter = new view.Gutter(document.getElementById('gutter'));
 var view = require('view');
+var eventtree = require('eventtree');
+
+// Constants
 
 var ZOOM_FACTOR = 1.1;
 var BORDER = 16;
 var MAX_SCALE = 500;
 
-var timePointer = document.getElementById("timepointer");
-
 var rootEvent = new model.Event(
     data.TIMELINES[0], data.TIMELINES[1], 
     data.TIMELINES[2], data.TIMELINES[3], data.TIMELINES[4]);
 
-var eventTree = new view.EventTree(document.getElementById('eventTree'), rootEvent);
-
+var eventTree = new eventtree.EventTree(document.getElementById('eventTree'), rootEvent);
+var gutter = new view.Gutter(document.getElementById('gutter'));
 var viewState = new view.State(eventTree.rootElement.offsetHeight, BORDER, rootEvent);
 
-var lastMouseY = eventTree.rootElement.offsetHeight / 2;
+var timePointer = document.getElementById("timepointer");
 
+var lastMouseY = eventTree.rootElement.offsetHeight / 2;
 
 
 function fixBounds() {
@@ -99,7 +102,6 @@ function updateTable(time) {
     document.getElementById("timePercent").innerHTML = timePercent;
 
 
-    
     var index = -1;
     var count = data.ENVIRONMENT.length;
     while (index + 1 < count && data.ENVIRONMENT[index + 1][0] <= time) {
@@ -186,7 +188,23 @@ function updateTimePointer() {
 }
 
 
+function gotoHash() {
+    var hash = window.location.hash;
+    var timespan = {start: rootEvent.start, end: rootEvent.end};
+    if (hash && hash.length > 2) {
+        hash = decodeURIComponent(hash.substr(1));
+        model.parseInterval(hash, timespan);
+    }
+    if (timespan.end <= timespan.start) {
+        timespan = rootEven;
+    }
+    viewState.zoomTo(timespan);
+    update(true);
+}
+
 // Event handlers 
+
+window.onhashchange = gotoHash;
 
 
 //timelineElement.addEventListener('DOMMouseScroll', onMouseWheel, false);  
@@ -195,9 +213,16 @@ gutter.rootElement.addEventListener("mousewheel", onMouseWheel, false);
 
 document.body.onclick = function(event) {
     var element = event.target;
-    if (!element) {
+    if (!element) return;
+
+    var href = element.getAttribute("href");
+    if (href && /wikipedia\.org\/wiki\//.test(href) && href.indexOf("File:") == -1) {
+        var cut = href.lastIndexOf('/');
+        showWikipedia(href.substr(cut + 1));
+        event.preventDefault();
         return;
     }
+
     var done = true;
     switch(element.id) {
         case 'metaTab':
@@ -218,9 +243,14 @@ document.body.onclick = function(event) {
             update(true);
             break;
         case 'reset':
-            viewState.zoomTo(rootEvent);
-            viewState.zoom(viewState.viewportHeight/2, 1/1.1);
-            update(true);
+            if (window.location.hash && window.location.hash.length > 1) {
+                window.location.hash = "";
+            } else {
+                viewState.zoomTo(rootEvent);
+                viewState.zoom(viewState.viewportHeight/2, 1/1.1);
+                update(true);
+            }
+            break;
         default:
             done = false;
     }
@@ -228,29 +258,7 @@ document.body.onclick = function(event) {
         event.preventDefault(); 
         return;
     }
-    while (element) {
-        var href = element.getAttribute("href");
-        var e = element.eventTreeEvent;
-        if (href) {
-            if (/wikipedia\.org\/wiki\//.test(href) && href.indexOf("File:") == -1) {
-                var cut = href.lastIndexOf('/');
-                showWikipedia(href.substr(cut + 1));
-            } else {
-                window.location = href;
-            }
-            event.preventDefault();
-            break;
-        } else if (e) {
-            while (e.end == e.start) {
-                e = e.parent;
-            }
-            viewState.zoomTo(e);
-            update(true);
-            event.preventDefault();
-            break;
-        }
-        element = element.parentElement;
-    }
+
 }
 
 
@@ -315,7 +323,7 @@ function onMouseWheel(e) {
             viewState.zoom(event.clientY, 1/ZOOM_FACTOR);
         }
     } else {
-        move(event.clientY, delta);
+        move(event.clientY, -delta);
     }
     e.preventDefault();
     update();
@@ -324,7 +332,6 @@ function onMouseWheel(e) {
 
 document.getElementById('timeline').onmousemove = function(event) {
     lastMouseY = event.clientY;
-    showZoom = event.clientX < gutter.rootElement.offsetWidth;
     updateTimePointer();
 };
 
@@ -338,13 +345,13 @@ document.onkeydown = function(event) {
     } else if (char === 189) {
         viewState.zoom(y, 1/ZOOM_FACTOR);
     } else if (char === 38) {
-        move(y, 10);
-    } else if (char === 40) {
         move(y, -10);
+    } else if (char === 40) {
+        move(y, 10);
     } else {
         return;
     }
     update(event.clientY);
 };
 
-update();
+gotoHash();

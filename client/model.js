@@ -111,6 +111,16 @@ model.timeToString = function(time, precision) {
     return s;
 };
 
+
+model.intervalToString = function(interval) {
+    var result = model.timeToString(interval.start);
+    if (interval.end > interval.start) {
+        result += " to " + model.timeToString(interval.end);
+    }
+    return result;
+};
+
+
 model.DASHES = ['–', '-', '—', ' to ', '&mdash;'];
 
 /** 
