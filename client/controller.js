@@ -24,6 +24,8 @@ var viewState = new view.State(eventTree.rootElement.offsetHeight, BORDER, rootE
 var timePointer = document.getElementById("timepointer");
 
 var lastMouseY = eventTree.rootElement.offsetHeight / 2;
+var mouseDownY = lastMouseY;
+var dragging = -1;
 
 
 function fixBounds() {
@@ -45,7 +47,7 @@ function fixBounds() {
 
 var resetTimer;
 
-function update(smooth) {
+function update(smooth, noFix) {
     if (resetTimer) {
         window.clearTimeout(resetTimer);
     }
@@ -57,7 +59,7 @@ function update(smooth) {
             resetTimer = null;
             update(true);
         }, 100);
-    } else {
+    } else if (!noFix) {
         fixBounds();
     }
 
@@ -188,77 +190,17 @@ function updateTimePointer() {
 }
 
 
-function gotoHash() {
-    var hash = window.location.hash;
+function gotoHash(hash) {
     var timespan = {start: rootEvent.start, end: rootEvent.end};
     if (hash && hash.length > 2) {
         hash = decodeURIComponent(hash.substr(1));
         model.parseInterval(hash, timespan);
     }
     if (timespan.end <= timespan.start) {
-        timespan = rootEven;
+        timespan = rootEvent;
     }
     viewState.zoomTo(timespan);
     update(true);
-}
-
-// Event handlers 
-
-window.onhashchange = gotoHash;
-
-
-//timelineElement.addEventListener('DOMMouseScroll', onMouseWheel, false);  
-eventTree.rootElement.addEventListener("mousewheel", onMouseWheel, false);
-gutter.rootElement.addEventListener("mousewheel", onMouseWheel, false);
-
-document.body.onclick = function(event) {
-    var element = event.target;
-    if (!element) return;
-
-    var href = element.getAttribute("href");
-    if (href && /wikipedia\.org\/wiki\//.test(href) && href.indexOf("File:") == -1) {
-        var cut = href.lastIndexOf('/');
-        showWikipedia(href.substr(cut + 1));
-        event.preventDefault();
-        return;
-    }
-
-    var done = true;
-    switch(element.id) {
-        case 'metaTab':
-            showTab('meta');
-            break;
-        case 'wikipediaTab':
-            showTab('wikipedia');
-            break;
-        case 'contextTab':
-            showTab('context');
-            break;
-        case 'zoomIn':
-            viewState.zoom(event.clientY, 1.3);
-            update(true);
-            break;
-        case 'zoomOut':
-            viewState.zoom(event.clientY, 1/1.3);
-            update(true);
-            break;
-        case 'reset':
-            if (window.location.hash && window.location.hash.length > 1) {
-                window.location.hash = "";
-            } else {
-                viewState.zoomTo(rootEvent);
-                viewState.zoom(viewState.viewportHeight/2, 1/1.1);
-                update(true);
-            }
-            break;
-        default:
-            done = false;
-    }
-    if (done) {
-        event.preventDefault(); 
-        return;
-    }
-
 }
 
 
@@ -287,13 +229,94 @@ function showWikipedia(title) {
 }
 
 
-function move(y, delta) {
-    if (delta < 0 && viewState.timeOffset <= rootEvent.start ) {
+function move(y, delta, autoZoom) {
+    if (delta < 0 && autoZoom && viewState.timeOffset <= rootEvent.start ) {
         viewState.zoom(BORDER, 1.1);
-    } else if (delta > 0 && viewState.yToTime(viewState.viewportHeight - BORDER + 1) >= rootEvent.end) {
+    } else if (delta > 0 && autoZoom && viewState.yToTime(viewState.viewportHeight - BORDER + 1) >= rootEvent.end) {
         viewState.zoom(viewState.viewportHeight - BORDER, 1.1);
     } else {
         viewState.timeOffset += delta / viewState.scale;
+    }
+}
+
+
+// Event handlers 
+
+
+window.onhashchange = function() {
+    gotoHash(window.location.hash);
+}
+
+
+//timelineElement.addEventListener('DOMMouseScroll', onMouseWheel, false);  
+eventTree.rootElement.addEventListener("mousewheel", onMouseWheel, false);
+gutter.rootElement.addEventListener("mousewheel", onMouseWheel, false);
+
+document.body.onclick = function(event) {
+    var element = event.target;
+
+    if (dragging == 1) {
+        dragging = -1;
+        event.preventDefault();
+        update(true);
+        return;
+    }
+    dragging = -1;
+
+    while(element) {
+        var href = element.getAttribute("href");
+        window.console.log("href: " + href);
+        if (href) {
+            if (/wikipedia\.org\/wiki\//.test(href) && href.indexOf("File:") == -1) {
+                var cut = href.lastIndexOf('/');
+                showWikipedia(href.substr(cut + 1));
+                event.preventDefault();
+                return;
+            } 
+            if (/^#/.test(href)) {
+                console.log("hashlink detected");
+                gotoHash(href);
+                event.preventDefault();
+                return;
+            }
+        }
+
+        var done = true;
+        switch(element.id) {
+            case 'metaTab':
+                showTab('meta');
+                break;
+            case 'wikipediaTab':
+                showTab('wikipedia');
+                break;
+            case 'contextTab':
+                showTab('context');
+                break;
+            case 'zoomIn':
+                viewState.zoom(event.clientY, 1.3);
+                update(true);
+                break;
+            case 'zoomOut':
+                viewState.zoom(event.clientY, 1/1.3);
+                update(true);
+                break;
+            case 'reset':
+                if (window.location.hash && window.location.hash.length > 1) {
+                    window.location.hash = "";
+                } else {
+                    viewState.zoomTo(rootEvent);
+                    viewState.zoom(viewState.viewportHeight/2, 1/1.1);
+                    update(true);
+                }
+                break;
+            default:
+                done = false;
+        }
+        if (done) {
+            event.preventDefault(); 
+            return;
+        }
+        element = element.parentElement;
     }
 }
 
@@ -323,21 +346,40 @@ function onMouseWheel(e) {
             viewState.zoom(event.clientY, 1/ZOOM_FACTOR);
         }
     } else {
-        move(event.clientY, -delta);
+        move(event.clientY, -delta, true);
     }
     e.preventDefault();
     update();
 }
 
+document.getElementById('timeline').onmousedown = function(event) {
+    if (event.which == 1 || event.button == 0) {
+        event.preventDefault();
+        mouseDownY = event.clientY;
+        dragging = 0;
+    }
+}
 
 document.getElementById('timeline').onmousemove = function(event) {
-    lastMouseY = event.clientY;
-    updateTimePointer();
+    console.log(event.which);
+    if (dragging == 0 && Math.abs(mouseDownY - event.clientY) > 5) {
+        dragging = 1;
+        lastMouseY = mouseDownY;
+    }
+    
+    if (dragging == 1) {
+        move(event.clientY, lastMouseY - event.clientY, false);
+        lastMouseY = event.clientY;
+        update(false, true);
+        event.preventDefault();
+    } else {
+        lastMouseY = event.clientY;
+        updateTimePointer();
+    }
 };
 
 
 document.onkeydown = function(event) {
-    console.log(event);
     var char = event.which == null ? event.keyCode : event.which;
     var y = eventTree.rootElement.offsetHeight / 2;
     if (char === 187) {
@@ -354,4 +396,4 @@ document.onkeydown = function(event) {
     update(event.clientY);
 };
 
-gotoHash();
+gotoHash(window.location.hash);
