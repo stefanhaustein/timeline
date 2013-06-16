@@ -286,4 +286,3 @@ eventtree.EventTree.prototype.renderNode = function(
         }
     }
 };
-

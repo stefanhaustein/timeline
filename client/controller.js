@@ -274,9 +274,11 @@ document.body.onclick = function(event) {
                 return;
             } 
             if (/^#/.test(href)) {
-                console.log("hashlink detected");
-                gotoHash(href);
-                event.preventDefault();
+                // scrolling is not reflected in the hash...
+                if (href == window.location.hash) {
+                    gotoHash(href);
+                    event.preventDefault();
+                }
                 return;
             }
         }
