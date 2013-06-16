@@ -17,15 +17,26 @@ var rootEvent = new model.Event(
     data.TIMELINES[0], data.TIMELINES[1], 
     data.TIMELINES[2], data.TIMELINES[3], data.TIMELINES[4]);
 
+var timelineElement = document.getElementById('timeline');
+var dividerElement = document.getElementById('divider');
+var sidebarElement = document.getElementById('sidebar');
+var eventGrabElement = document.getElementById('eventGrab');
+
 var eventTree = new eventtree.EventTree(document.getElementById('eventTree'), rootEvent);
 var gutter = new view.Gutter(document.getElementById('gutter'));
 var viewState = new view.State(eventTree.rootElement.offsetHeight, BORDER, rootEvent);
+
+var sidebarWidth = sidebarElement.offsetWidth;
+
+new view.Divider(document.getElementById('divider'), document.getElementById('sidebar'));
 
 var timePointer = document.getElementById("timepointer");
 
 var lastMouseY = eventTree.rootElement.offsetHeight / 2;
 var mouseDownY = lastMouseY;
-var dragging = -1;
+var dragging = null;
+var lastDragX = -1;
+var lastDragY = -1;
 
 
 function fixBounds() {
@@ -240,28 +251,99 @@ function move(y, delta, autoZoom) {
 }
 
 
-// Event handlers 
-
-
-window.onhashchange = function() {
-    gotoHash(window.location.hash);
+function handleMouseWheel(e) {
+    var delta = quirks.getNormalizedWheelDeltaY(event);
+    // shift -> zoom
+    if (e.ctrlKey || e.altKey) {
+        return;
+    }
+    
+    if (e.shiftKey) {
+        // Auto-axis swap in chrome...
+        if (delta == 0) {
+            delta = e.wheelDeltaX;
+        }
+        if (delta < 0) {
+            viewState.zoom(event.clientY, ZOOM_FACTOR);
+        } else if (delta > 0) {
+            viewState.zoom(event.clientY, 1/ZOOM_FACTOR);
+        }
+    } else {
+        move(event.clientY, -delta, true);
+    }
+    e.preventDefault();
+    update();
 }
 
 
-//timelineElement.addEventListener('DOMMouseScroll', onMouseWheel, false);  
-eventTree.rootElement.addEventListener("mousewheel", onMouseWheel, false);
-gutter.rootElement.addEventListener("mousewheel", onMouseWheel, false);
+// Timeline (gutter + tree) Event handlers 
 
-document.body.onclick = function(event) {
-    var element = event.target;
 
-    if (dragging == 1) {
-        dragging = -1;
+timelineElement.addEventListener("mousewheel", handleMouseWheel, false);
+
+timelineElement.onmousedown = function(event) {
+    if (event.which === 1 || event.button === 0 && dragging == null) {
+        dragging = timelineElement;
         event.preventDefault();
-        update(true);
-        return;
+        mouseDownY = event.clientY;
     }
-    dragging = -1;
+}
+
+timelineElement.onmousemove = function(event) {
+    lastMouseY = event.clientY;
+    updateTimePointer();
+}
+
+
+// Divider handler
+
+
+dividerElement.onmousedown = function(event) {
+    if (event.which === 1 || event.button === 0 && dragging == null) {
+        eventGrabElement.style.display = 'block';
+        dragging = dividerElement;
+        event.preventDefault();
+        sidebarWidth = sidebarElement.offsetWidth;
+    }
+}
+
+
+// Global handlers
+
+
+document.body.onmousemove = function(event) {
+    if (dragging == timelineElement) {
+        move(event.clientY, lastDragY - event.screenY, false);
+        update(false, true);
+        event.preventDefault();
+    } else if (dragging == dividerElement) {
+        sidebarWidth += lastDragX - event.screenX;
+        var cappedWidth = Math.max(320,
+                            Math.min(window.innerWidth - 320, sidebarWidth));
+        sidebarElement.style.width = cappedWidth;
+        update(false);
+        event.preventDefault();
+    }
+    
+    lastDragX = event.screenX;
+    lastDragY = event.screenY;
+};
+
+
+document.body.onmouseup = function(event) {
+    if (dragging != null) {
+        eventGrabElement.style.display = 'none';
+        dragging = null;
+        
+        // Prevent click.
+        if (Math.abs(mouseDownY - event.clientY) > 5) {
+            event.preventDefault();
+            update(true);
+            return;
+        }
+    }
+    
+    var element = event.target;
 
     while(element) {
         var href = element.getAttribute("href");
@@ -270,17 +352,19 @@ document.body.onclick = function(event) {
             if (/wikipedia\.org\/wiki\//.test(href) && href.indexOf("File:") == -1) {
                 var cut = href.lastIndexOf('/');
                 showWikipedia(href.substr(cut + 1));
-                event.preventDefault();
-                return;
-            } 
-            if (/^#/.test(href)) {
+            } else if (/^#/.test(href)) {
                 // scrolling is not reflected in the hash...
                 if (href == window.location.hash) {
                     gotoHash(href);
                     event.preventDefault();
+                } else {
+                    window.location.hash = href;
                 }
-                return;
+            } else {
+                window.location = href;
             }
+            event.preventDefault();
+            return;
         }
 
         var done = true;
@@ -320,65 +404,13 @@ document.body.onclick = function(event) {
         }
         element = element.parentElement;
     }
-}
-
-
-window.onresize = function(e) {
-    eventTree.rootElement.style.height = window.innerHeight;
-    viewState.setViewportHeight(window.innerHeight);
-    update();
 };
 
 
-function onMouseWheel(e) {
-    var delta = quirks.getNormalizedWheelDeltaY(event);
-    // shift -> zoom
-    if (e.ctrlKey || e.altKey) {
-        return;
-    }
-    
-    if (e.shiftKey) {
-        // Auto-axis swap in chrome...
-        if (delta == 0) {
-            delta = e.wheelDeltaX;
-        }
-        if (delta < 0) {
-            viewState.zoom(event.clientY, ZOOM_FACTOR);
-        } else if (delta > 0) {
-            viewState.zoom(event.clientY, 1/ZOOM_FACTOR);
-        }
-    } else {
-        move(event.clientY, -delta, true);
-    }
-    e.preventDefault();
-    update();
+document.body.onclick = function(event) {
+    // We handle everything ourself in onmouseup....
+    event.preventDefault();
 }
-
-document.getElementById('timeline').onmousedown = function(event) {
-    if (event.which == 1 || event.button == 0) {
-        event.preventDefault();
-        mouseDownY = event.clientY;
-        dragging = 0;
-    }
-}
-
-document.getElementById('timeline').onmousemove = function(event) {
-    console.log(event.which);
-    if (dragging == 0 && Math.abs(mouseDownY - event.clientY) > 5) {
-        dragging = 1;
-        lastMouseY = mouseDownY;
-    }
-    
-    if (dragging == 1) {
-        move(event.clientY, lastMouseY - event.clientY, false);
-        lastMouseY = event.clientY;
-        update(false, true);
-        event.preventDefault();
-    } else {
-        lastMouseY = event.clientY;
-        updateTimePointer();
-    }
-};
 
 
 document.onkeydown = function(event) {
@@ -397,5 +429,19 @@ document.onkeydown = function(event) {
     }
     update(event.clientY);
 };
+
+
+
+window.onresize = function(e) {
+    eventTree.rootElement.style.height = window.innerHeight;
+    viewState.setViewportHeight(window.innerHeight);
+    update();
+};
+
+
+window.onhashchange = function() {
+    gotoHash(window.location.hash);
+}
+
 
 gotoHash(window.location.hash);

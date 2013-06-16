@@ -139,6 +139,35 @@ html, body, td, div, tr, table {
     text-align: right;
 }
 
+#divider {
+    width: 14px;
+    float: right;
+    height: 100%;
+    border-left: solid 1px #fff;
+    border-right: solid 1px #fff;
+    background-color: #ddd;
+    color: #fff;
+    text-align: center;
+    line-height: 8px;
+    
+     -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    
+    cursor: move;
+}
+
+
+#eventGrab{
+    position:absolute;
+    bottom:0;
+    width:300px;
+    height:100%;
+    display:none;
+}
+
 #sidebar {
     width: 360px;
     height:100%;
@@ -151,6 +180,8 @@ html, body, td, div, tr, table {
     background-color: #ddd;
     border-right: solid 1px #fff;
     padding: 8px 16px;
+    cursor: hand;
+    width: 100px;
 }
 .tab.active {
     background-color: #fff;
