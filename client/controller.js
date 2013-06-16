@@ -28,8 +28,6 @@ var viewState = new view.State(eventTree.rootElement.offsetHeight, BORDER, rootE
 
 var sidebarWidth = sidebarElement.offsetWidth;
 
-new view.Divider(document.getElementById('divider'), document.getElementById('sidebar'));
-
 var timePointer = document.getElementById("timepointer");
 
 var lastMouseY = eventTree.rootElement.offsetHeight / 2;

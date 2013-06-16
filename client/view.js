@@ -84,52 +84,6 @@ view.State.prototype.setViewportHeight = function(viewportHeight) {
 };
 
 
-view.Divider = function(dividerElement, controlledElement) {
-    this.dividerElement = dividerElement;
-    this.controlledElement = controlledElement;
-    
-    this.dragging = false;
-    this.lastX = -1;
-    this.controlledWidth = null;
-
-    var self = this;
-    
-    /*
-    dividerElement.onmousedown = function(event) {
-        if (event.button != 0 && event.which != 1) return;
-        self.dragging = true;
-        self.lastX = event.screenX;
-        event.preventDefault();
-        if (!self.controlledWidth) {
-            self.controlledWidth = self.controlledElement.offsetWidth
-        }
-    }
-    
-    dividerElement.onmousemove = function(event) {
-        if (!self.dragging) return;
-        self.controlledWidth += self.lastX - event.screenX;
-        self.controlledElement.style.width = self.controlledWidth;
-        self.lastX = event.screenX;
-        event.preventDefault();
-    }
-    
-    dividerElement.onmouseout = function(event) {
-        if (self.dragging) {
-            self.dragging = false;
-            event.preventDefault();
-        }
-    }
-    
-    dividerElement.onmouseup = function(evnet) {
-        if (self.dragging) {
-            self.dragging = false;
-            event.preventDefault();
-        }
-    }
-    */
-}
-
-
 /**
  * The scale displayed on the left hand side.
  * 
