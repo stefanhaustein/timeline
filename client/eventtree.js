@@ -128,7 +128,7 @@ eventtree.EventTree.prototype.renderLeaf = function(
     element.style.top = top;
     element.style.width = width;
     var height = Math.floor((viewState.timeToY(timeLimit) - y) / 20) * 20;
-    element.style.maxHeight = height;
+    element.style.maxHeight = height + "px";
     
     if (height < element.scrollHeight) {
         element.classList.add('overflow');

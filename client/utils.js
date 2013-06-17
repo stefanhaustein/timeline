@@ -11,9 +11,9 @@ var cache = {
         }
     },
     quirks: {
-        getNormalizedWheelDeltaY: function(e) {
-            var dy = e.wheelDeltaY / 3.0;
-//            window.console.log("wheelDeltaY: " + e.wheelDeltaY + "; normalized: " + dy);
+        getNormalizedWheelDeltaY: function(event) {
+            var dy = event.wheelDeltaY ? event.wheelDeltaY / 3.0 : event.detail;
+//            window.console.log("wheelDeltaY: " + event.wheelDeltaY + "; normalized: " + dy);
             return dy;
         }
     }

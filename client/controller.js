@@ -273,17 +273,18 @@ function move(y, delta, autoZoom) {
 }
 
 
-function handleMouseWheel(e) {
+function handleMouseWheel(event) {
     var delta = quirks.getNormalizedWheelDeltaY(event);
+  
     // shift -> zoom
-    if (e.ctrlKey || e.altKey) {
+    if (delta == 0 || event.ctrlKey || event.altKey) {
         return;
     }
     
-    if (e.shiftKey) {
+    if (event.shiftKey) {
         // Auto-axis swap in chrome...
         if (delta == 0) {
-            delta = e.wheelDeltaX;
+            delta = event.wheelDeltaX;
         }
         if (delta < 0) {
             viewState.zoom(event.clientY, ZOOM_FACTOR);
@@ -293,7 +294,7 @@ function handleMouseWheel(e) {
     } else {
         move(event.clientY, -delta, true);
     }
-    e.preventDefault();
+    event.preventDefault();
     update();
 }
 
@@ -302,6 +303,7 @@ function handleMouseWheel(e) {
 
 
 timelineElement.addEventListener("mousewheel", handleMouseWheel, false);
+timelineElement.addEventListener("DOMMouseScroll", handleMouseWheel, false);
 
 timelineElement.onmousedown = function(event) {
     if (event.which === 1 || event.button === 0 && dragging == null) {

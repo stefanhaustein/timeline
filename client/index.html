@@ -6,36 +6,31 @@
     </style>
 </head>
 <body>
-    <!-- This ugly thing comes first and floats to the right. 
-         This is a table so we can use height: 100% -->
-    <table id="sidebar" cellspacing=0 cellpadding=0 border=0>
-        <tr id="tabs">
-            <td id="contextTab" class="tab active">Context</td>
-            <td id="metaTab" class="tab">Meta</td>
-            <td id="wikipediaTab" class="tab">Wikipedia</td>
-            <td width=80> </td>
-        </tr>
-        <tr>
-            <td colspan="4" valign="top">
-                <div id="eventGrab"></div>
-                <div id="contextCard" class="card">
-                    <a id="globe"></a>
-                    <a id="globeLabel"></a>
+    <div id="sidebar">
+      <div id="Tabs" style='position:fixed'>
+        <div id="contextTab" class="tab active">Context</div>
+        <div id="metaTab" class="tab">Meta</div>
+        <div id="wikipediaTab" class="tab">Wikipedia</div>
+      </div>
+      <div id="eventGrab"></div>
+        <div id="contextCard" class="card active">
+            <a id="globe"></a>
+            <a id="globeLabel"></a>
 
-                    <!-- A HTML table used for actually rendering a table! -->
-                    <table class="dataTable">
-                        <tr><td>Time</td><td class="data" id="tableTime">n/a</td><td id="timeUnit" width="50px"></td></tr>
-                        <tr><td>Relative age</td><td class="data" id="timePercent">n/a</td><td>%</td></tr>
-                        <tr><td>Athmospheric O<sub>2</sub></td><td class="data" id="o2">n/a</td><td>Vol %</td></tr>
-                        <tr><td>Athmospheric CO<sub>2</sub></td><td class="data" id="co2">n/a</td><td>ppm</td></tr>
-                        <tr><td>Surface Temperature</td><td class="data" id="temperature">n/a</td><td>&deg;C</td></tr>
-                        <tr><td>Sea Level</td><td class="data" id="seaLevel">n/a</td><td>m</td></tr>
-                        <tr><td>Population</td><td class="data" id="population">n/a</td><td id="populationUnit"></td></tr>
-                    </table>
-                    <p>Source: Geological period data on Wikipedia (interpolated).</p>
-                </div>
-                <div id="metaCard" class="card">
-                    <p><b>Timeline</b></p>
+            <!-- A HTML table used for actually rendering a table! -->
+            <table class="dataTable">
+                <tr><td>Time</td><td class="data" id="tableTime">n/a</td><td id="timeUnit" width="50px"></td></tr>
+                <tr><td>Relative age</td><td class="data" id="timePercent">n/a</td><td>%</td></tr>
+                <tr><td>Athmospheric O<sub>2</sub></td><td class="data" id="o2">n/a</td><td>Vol %</td></tr>
+                <tr><td>Athmospheric CO<sub>2</sub></td><td class="data" id="co2">n/a</td><td>ppm</td></tr>
+                <tr><td>Surface Temperature</td><td class="data" id="temperature">n/a</td><td>&deg;C</td></tr>
+                <tr><td>Sea Level</td><td class="data" id="seaLevel">n/a</td><td>m</td></tr>
+                <tr><td>Population</td><td class="data" id="population">n/a</td><td id="populationUnit"></td></tr>
+            </table>
+            <p>Source: Geological period data on Wikipedia (interpolated).</p>
+        </div>
+        <div id="metaCard" class="card">
+            <p><b>Timeline</b></p>
                     <p>This project pulls timelines from Wikipedia, parses them
                         and puts them into a coherent zoomable view. This is
                         mostly inspired by Huang's great Flash app "The Scale of the Universe"
@@ -67,11 +62,9 @@
                         <li>Test on more browsers, in particular scroll wheel speed</li>
                     </ol>
                    
-                </div>
-                <iframe id="wikipediaCard" class="card" src="http://en.m.wikipedia.org/wiki/Main_Page"></iframe>
-            </td>
-        </tr> 
-    </table>
+        </div>
+        <iframe id="wikipediaCard" class="card" src="http://en.m.wikipedia.org/wiki/Main_Page"></iframe>
+    </div>
     <div id="divider"><div style="height:45%"></div>||<br>||</div>
     <div id="timeline">
         <div id="gutter" >

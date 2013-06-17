@@ -182,16 +182,21 @@ html, body, td, div, tr, table {
     width: 360px;
     height:100%;
     float: right;
+    overflow: auto;
 }
 #tabs {
     height: 32px;
+    background-color:#666;
+    width:100%;
+    border-bottom: 1px solid white;
 }
 .tab {
+    float: left;
     background-color: #ddd;
     border-right: solid 1px #fff;
-    padding: 8px 16px;
+    padding: 6px 16px;
     cursor: hand;
-    width: 100px;
+    height: 100%;
 }
 .tab.active {
     background-color: #fff;
@@ -199,17 +204,16 @@ html, body, td, div, tr, table {
 }
 
 .card {
-    height: 100%;
-    overflow: auto;
+    padding: 40px 8px 8px 8px;
     background-color:#fff;
+    display:none;
+    min-height:100%;
 }
 .card.active {
     display: block;
 }
 
-#contextCard {
-    padding: 10px;
-}
+
 #globe {
     display: block;
     height: 200px;
@@ -226,10 +230,9 @@ html, body, td, div, tr, table {
 
 #metaCard {
     display: none;
-    padding: 10px;
 }
+
 #wikipediaCard {
-    height:100%;
     width:100%;
     display:none;
     border: none;
