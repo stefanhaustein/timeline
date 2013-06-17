@@ -85,10 +85,10 @@ model.formatNumber = function(n, fd) {
  */
 model.timeToString = function(time, precision) {
     if (!precision) {
-        precision = 1000000000;
-    } else {
-        precision = Math.abs(precision);
+        precision = time / 100;
     }
+    precision = Math.abs(precision);
+    
     if (time-2013 <= -100000 && precision >= 1e4) {
         var nk;
         if (precision <  1e5) {
@@ -121,7 +121,7 @@ model.intervalToString = function(interval) {
 };
 
 
-model.DASHES = ['–', '-', '—', ' to ', '&mdash;'];
+model.DASHES = ['—', '–', '&mdash;', ' to ',  '-'];
 
 /** 
  * Parses a time interval to the start and end properties of the given
