@@ -12,6 +12,7 @@ var eventtree = require('eventtree');
 var ZOOM_FACTOR = 1.1;
 var BORDER = 16;
 var MAX_SCALE = 500;
+var MIN_SIZE = 200;
 
 var rootEvent = new model.Event(
     data.TIMELINES[0], data.TIMELINES[1], 
@@ -213,6 +214,29 @@ function gotoHash(hash) {
 }
 
 
+function showFully(element, event) {
+    var parent = event.parent;
+    var nextStart = parent.end;
+    for (var i = 0; i < parent.children.length - 1; i++) {
+        if (parent.children[i] == event) {
+            nextStart = parent.children[i + 1].start;
+            break;
+        }
+    }
+    var pixelsNeeded = element.scrollHeight + 10;
+    var pixelsAvailable = viewState.timeToY(nextStart) - viewState.timeToY(event.start);
+    
+    console.log(event);
+    console.log(parent.children[i + 1]);
+    console.log("needed: " + pixelsNeeded + " available: " + pixelsAvailable + " nextStart: " + nextStart + " eventStart " + event.start);
+    
+    if (pixelsNeeded > pixelsAvailable) {
+        viewState.zoom(viewState.timeToY(event.start), pixelsNeeded / pixelsAvailable);
+        update(true);
+    }
+}
+
+
 function showTab(name) {
     document.getElementById("contextTab").classList.remove("active");
     document.getElementById("metaTab").classList.remove("active");
@@ -316,11 +340,12 @@ document.body.onmousemove = function(event) {
         event.preventDefault();
     } else if (dragging == dividerElement) {
         sidebarWidth += lastDragX - event.screenX;
-        var cappedWidth = Math.max(320,
-                            Math.min(window.innerWidth - 320, sidebarWidth));
+        var cappedWidth = Math.max(MIN_SIZE,
+                            Math.min(window.innerWidth - MIN_SIZE, sidebarWidth));
         sidebarElement.style.width = cappedWidth;
         update(false);
         event.preventDefault();
+        globeIndex = -1;
     }
     
     lastDragX = event.screenX;
@@ -361,6 +386,12 @@ document.body.onmouseup = function(event) {
             } else {
                 window.location = href;
             }
+            event.preventDefault();
+            return;
+        }
+        var treeEvent = element.eventTreeEvent;
+        if (treeEvent && treeEvent.start == treeEvent.end) {
+            showFully(element, treeEvent);
             event.preventDefault();
             return;
         }
@@ -408,7 +439,7 @@ document.body.onmouseup = function(event) {
 document.body.onclick = function(event) {
     // We handle everything ourself in onmouseup....
     event.preventDefault();
-}
+};
 
 
 document.onkeydown = function(event) {

@@ -114,10 +114,21 @@ html, body, td, div, tr, table {
 }
 #eventTree .leaf {
     /*border-top:1px solid black;*/
-    padding: 3px 3px 3px 24px;
+    padding: 0 12px 0 20px;
     text-indent: -20px;
     text-overflow: ellipsis;
 }
+
+#eventTree .leaf.overflow:after {
+    content: "\22ee";
+    display: block;
+    font-weight: bold;
+    position: absolute;
+    bottom: 0;
+    right:-7px;
+    background: inherit;
+}
+
 #eventTree .label {
     padding: 3px;
     overflow: hidden;
@@ -143,12 +154,11 @@ html, body, td, div, tr, table {
     width: 14px;
     float: right;
     height: 100%;
-    border-left: solid 1px #fff;
+    border-left: solid 1px #000;
     border-right: solid 1px #fff;
     background-color: #ddd;
-    color: #fff;
     text-align: center;
-    line-height: 8px;
+    line-height: 14px;
     
      -webkit-user-select: none;
     -khtml-user-select: none;

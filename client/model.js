@@ -348,6 +348,7 @@ model.Event.prototype.parse = function(text) {
     var format = this.format;
     var inSection = !this.section;
     var sectionLevel = 10000;
+    var lastLeaf = null;
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i].trim();
         var len = line.length;
@@ -421,8 +422,16 @@ model.Event.prototype.parse = function(text) {
                 } else {
                     var childEvent = new model.Event(timespan, timespan + ': ' + description.trim());
                     childEvent.end = childEvent.start; // hack.
+
                     if (!isNaN(childEvent.start)) {
-                        current.append(childEvent);
+                        // Don't add a new event at the same time -- won't
+                        // be accessible in the ui..
+                        if (lastLeaf && lastLeaf.start == childEvent.start) {
+                            lastLeaf.description += ' ' + childEvent.description;
+                        } else {
+                            current.append(childEvent);
+                            lastLeaf = childEvent;
+                        }
                     }
                 }
             }

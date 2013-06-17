@@ -39,6 +39,9 @@ eventtree.EventTree = function(rootElement, rootEvent) {
      * is hidden correctly. There must be way to get rid of this....
      */
     this.zIndex = 0;
+    
+    this.lastScale;
+    this.savedScale;
 };
 
 eventtree.LABEL_WIDTH = 150;
@@ -71,7 +74,12 @@ eventtree.EventTree.prototype.render = function(viewState, addElements) {
     if (this.timer) {
         clearTimeout(this.timer);
     }
-    
+        
+    if (viewState.scale != this.savedScale) {
+        this.lastScale = this.savedScale;
+        this.savedScale = viewState.scale;
+    }
+        
     this.zIndex = 0;
     this.dirty = false;
     this.mayAdd = addElements ? 2 : 0;
@@ -88,12 +96,12 @@ eventtree.EventTree.prototype.render = function(viewState, addElements) {
 
 
 eventtree.EventTree.prototype.renderLeaf = function(
-        viewState, parentElement, parentY, event, hide, timeLimit, width, viewportHeight) {
+        viewState, parentElement, parentY, event, timeLimit, width, viewportHeight) {
     var y = viewState.timeToY(event.start);
     var top = y - parentY;
 
     var element = document.getElementById(event.id);
-    if (hide || y > viewportHeight) {
+    if (y > viewportHeight) {
         if (element) {
             parentElement.removeChild(element);
         }
@@ -109,33 +117,24 @@ eventtree.EventTree.prototype.renderLeaf = function(
         element.setAttribute('id', event.id);
         element.className = 'event leaf';
         element.eventTreeEvent = event;
-        element.innerHTML = event.getHtml();
+        element.innerHTML = //'&macr;&nbsp;&nbsp;' + 
+            event.getHtml();
         parentElement.appendChild(element);
+        element.eventTreeEvent = event;
     } else {
         element.classList.add('stable');
     }
 
     element.style.top = top;
     element.style.width = width;
-    if (!element.heightForWidth) {
-        element.heightForWidth = [];
+    var height = Math.floor((viewState.timeToY(timeLimit) - y) / 20) * 20;
+    element.style.maxHeight = height;
+    
+    if (height < element.scrollHeight) {
+        element.classList.add('overflow');
+    } else {
+        element.classList.remove('overflow');
     }
-
-    var height = element.heightForWidth[width];
-    if (height == null) {
-        element.style.display = 'block';
-        height = element.offsetHeight;
-        element.heightForWidth[width] = height;
-    }
-    if (y + height > viewState.timeToY(timeLimit)) {
-        element.style.display = 'none';
-        return 0;
-    }
-    if (element.style.display == 'none') {
-        element.style.display = 'block';
-        element.classList.remove('stable');
-    }
-    return height;
 };
 
 
@@ -254,31 +253,47 @@ eventtree.EventTree.prototype.renderNode = function(
     }
     
     var filledToTime = event.start; 
-    var childTimeLimit = event.start;
+    
+    // "Time" height of a line on the screen 
+    var timeHeight = 20 / viewState.scale;
+    
+    var zoomIn = viewState.scale > this.lastScale;
+
     for (var i = 0; i < count; i++) {
         var child = event.children[i];
 
-        if (childTimeLimit <= child.start) {
-            childTimeLimit = event.end;
-            for (var j = i + 1; j < count; j++) {
-                var childJ = event.children[j];
-                if (childJ.start != childJ.end || 
-                    (document.getElementById(childJ.id) &&
-                     document.getElementById(childJ.id).style.display != 'none')) {
-                    childTimeLimit = Math.min(childJ.start, childTimeLimit);
-                    break;
+        if (child.start == child.end) {
+            var childTimeLimit = event.end;
+            var hide = child.start < filledToTime || 
+                child.start + timeHeight > childTimeLimit;
+            var childElement = document.getElementById(child.id);
+            if (!hide) {
+                for (var j = i + 1; j < count; j++) {
+                    var childJ = event.children[j];
+                    if (childJ.start > child.start + timeHeight) {
+                        childTimeLimit = childJ.start;
+                        break;
+                    }
+                    if (childJ.start != childJ.end) {
+                        hide = true;
+                        break;
+                    }
+                    if (!childElement && document.getElementById(childJ.id)) {
+                        hide = true;
+                        break;
+                    }
                 }
             }
-        }
-
-        var hide = filledToTime > child.start;
-
-        if (child.start == child.end) {
-            var height = this.renderLeaf(
-                viewState, containerDiv, y, child, hide, childTimeLimit, containerWidth, viewportHeight);
-            if (height != 0) {
-                filledToTime = viewState.yToTime(viewState.timeToY(child.start) + height);
-            } 
+            
+            if (hide) {
+                if (childElement) {
+                    containerDiv.removeChild(childElement);
+                }
+            } else {
+                this.renderLeaf(
+                    viewState, containerDiv, y, child, childTimeLimit, containerWidth, viewportHeight);
+                filledToTime = child.start + timeHeight;
+            }
         } else {
             this.renderNode(
                 viewState, containerDiv, y, child, collapse - 1, i / (count + 1),  containerWidth, viewportHeight);
