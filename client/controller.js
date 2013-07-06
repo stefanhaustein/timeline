@@ -113,17 +113,14 @@ function updateTable(time) {
     timePercent = timePercent.toPrecision(3);
     document.getElementById("timePercent").innerHTML = timePercent;
 
-
-    var index = -1;
     var count = data.ENVIRONMENT.length;
-    while (index + 1 < count && data.ENVIRONMENT[index + 1][0] <= time) {
-        index++;
-    }
-    var startData = index == -1 ? [NaN, NaN, NaN, NaN, NaN] : data.ENVIRONMENT[index];
-    var endData = index + 1 == count ? startData : data.ENVIRONMENT[index + 1];
+    var index = data.binarySearch(data.ENVIRONMENT, time);
+
+    var startData = index == 0 ? [NaN, NaN, NaN, NaN, NaN] : data.ENVIRONMENT[index - 1];
+    var endData = index == count ? startData : data.ENVIRONMENT[index];
     
     // interpolate.
-    var fraction = index + 1 == count ? 0.5 : (time - startData[0]) / (endData[0] - startData[0]);
+    var fraction = index == count ? 0.5 : (time - startData[0]) / (endData[0] - startData[0]);
     var interpolated = [];
     for (var i = 0; i < startData.length; i++) {
         interpolated[i] = startData[i] * (1-fraction) + endData[i] * fraction;
@@ -140,8 +137,10 @@ var globeIndex = -1;
 function updateGlobe(time) {
     var index = 0;
     var count = data.GLOBES.length;
-    while (index + 1 < count && data.GLOBES[index + 1][0] <= time) {
-        index++;
+
+    index = data.binarySearch(data.GLOBES, time);
+    if (index > 0 && (index >= count || data.GLOBES[index][0] > time)) {
+        index--;
     }
     
     if (globeIndex == index) {
@@ -228,7 +227,8 @@ function showFully(element, event) {
     
     console.log(event);
     console.log(parent.children[i + 1]);
-    console.log("needed: " + pixelsNeeded + " available: " + pixelsAvailable + " nextStart: " + nextStart + " eventStart " + event.start);
+    console.log("needed: " + pixelsNeeded + " available: " + pixelsAvailable + 
+        " nextStart: " + nextStart + " eventStart " + event.start);
     
     if (pixelsNeeded > pixelsAvailable) {
         viewState.zoom(viewState.timeToY(event.start), pixelsNeeded / pixelsAvailable);

@@ -21,6 +21,24 @@ data.TIMELINES = [
     ]
 ];
 
+data.binarySearch = function(array, time) {
+    var start = 0;
+    var end = array.length;
+    
+    while(start < end) {
+        var index = Math.floor((start + end) / 2);
+        if (array[index][0] == time) {
+            return index;
+        } else if (array[index][0] < time) {
+            start = index + 1;
+        } else {
+            end = index;
+        }
+    }
+    return start;
+}
+
+
 function month(m) {
     return (m - 0.5) / 12;
 }
@@ -127,6 +145,10 @@ data.ENVIRONMENT = [
     [-23.03e6, 21.5,  280,  14,   0],
     [-2.58e6,  20.8,  250,  14,   0]
 ];
+
+data.IMAGES = [
+    [-1100e6, "Dinoflagellate", "8/89/Ceratium_furca.jpg"]
+]
 
 
 data.colors = {  
