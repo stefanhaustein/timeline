@@ -12,7 +12,7 @@ var model = require('model');
 eventtree.EventTree = function(rootElement, rootEvent) {
     
     /** 
-     * The root element the event tree is rendere into.
+     * The root element the event tree is rendered into.
      * @type {!Element} 
      */
     this.rootElement = rootElement;  

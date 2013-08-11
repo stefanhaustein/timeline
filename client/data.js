@@ -147,6 +147,15 @@ data.ENVIRONMENT = [
 ];
 
 data.IMAGES = [
+    [-13200e6, "HE 1523-0901","5/5f/He1523a.jpg"],
+    [-12700e6, "Quasar", "3/38/Artist%27s_rendering_ULAS_J1120%2B0641.jpg"],
+    [-9000e6, "Population I", "4/4d/Mu_Arae_star.jpg"],
+    [-4570e6, "Supernova", "d/d4/Keplers_supernova.jpg"],
+ //   [-4533e6, "Giant impact hypothesis", "b/b8/Giantimpact.gif"],
+    [-4533e6, "Magma", "8/82/Pahoehoe_toe.jpg"],
+    [-4404e6, "Minerals", "a/a3/Améthystre_sceptre2.jpg"],
+    [-4100e6, "Acasta Gneiss","0/01/Acasta_gneiss.jpg"],
+    [-3800e6, "Banded Iron","5/5f/Black-band_ironstone_%28aka%29.jpg"],
     [-1100e6, "Dinoflagellate", "8/89/Ceratium_furca.jpg"]
 ]
 
