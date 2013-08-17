@@ -2,6 +2,7 @@ var data = module.exports = exports = {};
 
 data.FORMAT_LIST = ['*', ':', 0, 1];
 
+// Structure: Time span, Title, format, , Array of sub-lists
 data.TIMELINES = [
     "13,700 Ma - 2013", "Timeline of natural history", data.FORMAT_LIST, null, [
         ["200,000 years ago - 2013", "Timeline of human history", null, null, [

@@ -1,7 +1,7 @@
 var wiki = module.exports = exports = {};
 
 /**
- * Parses wiki text to plain text or html, depnding on the toHtml parameter.
+ * Parses wiki text to plain text or html, depending on the toHtml parameter.
  * 
  * @param {string} wt The wikitext to parse.
  * @param {boolean} html Whether to parse to html (true) or plain text (false).
@@ -77,8 +77,10 @@ wiki.callbackId = 0;
 
 wiki.getUrl = function(title) {
   return 'http://en.wikipedia.org/wiki/' + title; 
-}
+};
 
+
+// Could be used for the RHS wiki tab
 wiki.fetchHtml = function(title, callback) {
     var callbackName = "globaljsonpcallback" + wiki.callbackId++;
     window[callbackName] = function(response) {
@@ -91,6 +93,7 @@ wiki.fetchHtml = function(title, callback) {
     script.setAttribute('src', url);
     document.getElementsByTagName('head')[0].appendChild(script);
 };
+
 
 wiki.fetchWikiText = function(title, callback) {
     var callbackName = "globaljsonpcallback" + wiki.callbackId++;
@@ -107,8 +110,12 @@ wiki.fetchWikiText = function(title, callback) {
             }
         }
     };
-    var url = "http://en.wikipedia.org/w/api.php?action=query&redirects&prop=revisions&rvprop=content&format=json&titles=" +
-        encodeURIComponent(title) + "&callback=" + callbackName;
+    var url = "http://en.wikipedia.org/w/api.php?action=query&redirects&prop=revisions&rvprop=content&format=json&rvlimit=1" + 
+        // TODO(haustein) Use a safe date instead and use a constant.
+        // Do we need per-article revisions?
+        "&rvstartid=567008723" +
+        "&titles=" + encodeURIComponent(title) + 
+        "&callback=" + callbackName;
     console.log("fetchWikiText: " + url);
     var script = document.createElement('script');
     script.setAttribute('src', url);
