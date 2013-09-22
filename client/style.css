@@ -149,6 +149,9 @@ html, body, td, div, tr, table {
     transform-origin: top left;
     text-align: right;
 }
+#eventTree .eventImage {
+    float: right;
+}
 
 #divider {
     width: 14px;

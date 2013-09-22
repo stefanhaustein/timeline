@@ -22,6 +22,23 @@ data.TIMELINES = [
     ]
 ];
 
+
+data.IMAGES = {
+//    "he 1523-0901": "5/5f/He1523a.jpg",
+    "quasar": ["3/38/Artist%27s_rendering_ULAS_J1120%2B0641.jpg", 2/1],
+    "population I": ["4/4d/Mu_Arae_star.jpg", 754/724],
+    "supernova": ["d/d4/Keplers_supernova.jpg", 900/720],
+    "giant impact hypothesis": ["b/b8/Giantimpact.gif", 320/257],
+    "magma": ["8/82/Pahoehoe_toe.jpg", 8/5],
+    "minerals": ["a/a3/Améthystre_sceptre2.jpg", 2893 / 3552],
+    "acasta gneiss": ["0/01/Acasta_gneiss.jpg", 8/6],
+    "bnanded iron": ["5/5f/Black-band_ironstone_%28aka%29.jpg", 2692 / 1936],
+    "dinoflagellate": ["8/89/Ceratium_furca.jpg", 73/35],
+};
+
+
+
+
 data.binarySearch = function(array, time) {
     var start = 0;
     var end = array.length;
@@ -146,20 +163,6 @@ data.ENVIRONMENT = [
     [-23.03e6, 21.5,  280,  14,   0],
     [-2.58e6,  20.8,  250,  14,   0]
 ];
-
-data.IMAGES = [
-    [-13200e6, "HE 1523-0901","5/5f/He1523a.jpg"],
-    [-12700e6, "Quasar", "3/38/Artist%27s_rendering_ULAS_J1120%2B0641.jpg"],
-    [-9000e6, "Population I", "4/4d/Mu_Arae_star.jpg"],
-    [-4570e6, "Supernova", "d/d4/Keplers_supernova.jpg"],
- //   [-4533e6, "Giant impact hypothesis", "b/b8/Giantimpact.gif"],
-    [-4533e6, "Magma", "8/82/Pahoehoe_toe.jpg"],
-    [-4404e6, "Minerals", "a/a3/Améthystre_sceptre2.jpg"],
-    [-4100e6, "Acasta Gneiss","0/01/Acasta_gneiss.jpg"],
-    [-3800e6, "Banded Iron","5/5f/Black-band_ironstone_%28aka%29.jpg"],
-    [-1100e6, "Dinoflagellate", "8/89/Ceratium_furca.jpg"]
-]
-
 
 data.colors = {  
   'timeline of natural history': [0,0,0],

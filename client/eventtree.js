@@ -46,6 +46,8 @@ eventtree.EventTree = function(rootElement, rootEvent) {
 
 eventtree.LABEL_WIDTH = 150;
 eventtree.ROT_LABEL_WIDTH = 24;
+eventtree.LINE_HEIGHT = 20;
+eventtree.MIN_LINES = 2;
 
 eventtree.EventTree.prototype.measureDepth = function(event, viewState) {
     var h = this.rootElement.offsetHeight;
@@ -121,15 +123,32 @@ eventtree.EventTree.prototype.renderLeaf = function(
             event.getHtml();
         parentElement.appendChild(element);
         element.eventTreeEvent = event;
+        
+        if (event.images) {
+            for (var i = 0; i < event.images.length; i++) {
+                var image = event.images[i];
+                var imageName = image[0];
+                var cut = imageName.lastIndexOf('/');
+                var requestSize = Math.round(eventtree.MIN_LINES * eventtree.LINE_HEIGHT * image[1]);
+                var link = wiki.getUrl('File:' + imageName.substr(cut + 1));
+
+                var imageElement = document.createElement("img");
+                element.insertBefore(imageElement, element.firstChild);
+                imageElement.className = 'eventImage';
+                imageElement.src = "http://upload.wikimedia.org/wikipedia/commons/thumb/" + 
+                    imageName + "/"+requestSize +"px-" + imageName.substr(cut + 1);
+                window.console.log("requesting image: " + imageElement.src);
+            }
+        }
     } else {
         element.classList.add('stable');
     }
 
     element.style.top = top;
     element.style.width = width;
-    var height = Math.floor((viewState.timeToY(timeLimit) - y) / 20) * 20;
+    var height = Math.floor((viewState.timeToY(timeLimit) - y) / eventtree.LINE_HEIGHT) * eventtree.LINE_HEIGHT;
     element.style.maxHeight = height + "px";
-    
+
     if (height < element.scrollHeight) {
         element.classList.add('overflow');
     } else {
@@ -255,7 +274,7 @@ eventtree.EventTree.prototype.renderNode = function(
     var filledToTime = event.start; 
     
     // "Time" height of a line on the screen 
-    var timeHeight = 20 / viewState.scale;
+    var timeHeight = eventtree.MIN_LINES * eventtree.LINE_HEIGHT / viewState.scale;
     
     var zoomIn = viewState.scale > this.lastScale;
 
