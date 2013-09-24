@@ -24,16 +24,17 @@ data.TIMELINES = [
 
 
 data.IMAGES = {
-//    "he 1523-0901": "5/5f/He1523a.jpg",
-    "quasar": ["3/38/Artist%27s_rendering_ULAS_J1120%2B0641.jpg", 2/1],
-    "population I": ["4/4d/Mu_Arae_star.jpg", 754/724],
-    "supernova": ["d/d4/Keplers_supernova.jpg", 900/720],
-    "giant impact hypothesis": ["b/b8/Giantimpact.gif", 320/257],
-    "magma": ["8/82/Pahoehoe_toe.jpg", 8/5],
-    "minerals": ["a/a3/Améthystre_sceptre2.jpg", 2893 / 3552],
     "acasta gneiss": ["0/01/Acasta_gneiss.jpg", 8/6],
-    "bnanded iron": ["5/5f/Black-band_ironstone_%28aka%29.jpg", 2692 / 1936],
+    "banded iron": ["5/5f/Black-band_ironstone_%28aka%29.jpg", 2692 / 1936],
     "dinoflagellate": ["8/89/Ceratium_furca.jpg", 73/35],
+    "giant impact hypothesis": ["b/b8/Giantimpact.gif", 320/257],
+//    "he 1523-0901": "5/5f/He1523a.jpg",
+//    "magma": ["8/82/Pahoehoe_toe.jpg", 8/5],
+    "minerals": ["a/a3/Améthystre_sceptre2.jpg", 2893 / 3552],
+    "population i": ["4/4d/Mu_Arae_star.jpg", 754/724],
+    "quasar": ["3/38/Artist%27s_rendering_ULAS_J1120%2B0641.jpg", 2/1],
+    "red alga": ["7/7d/Laurencia.jpg", 900/722],
+    "supernova": ["d/d4/Keplers_supernova.jpg", 900/720],
 };
 
 

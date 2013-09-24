@@ -23,7 +23,7 @@ wiki.parse = function(wt, toHtml) {
                     pos = i + 1;
                 } else {
                     if (toHtml) {
-                        var tag = wt.substring(i, end);
+                        var tag = wt.substring(i, end + 1);
                         if (tag == "<sup>" || tag == "</sup>" || tag == "<ref>" || tag == "</ref>") {
                             s += tag;
                         }
@@ -67,9 +67,10 @@ wiki.parse = function(wt, toHtml) {
     
     s += wt.substr(pos);
     
-    //console.log("Wikitext:  " + wt);
-    //console.log("Converted: " + s);
-    
+    if (toHtml) {
+    console.log("Wikitext:  " + wt);
+    console.log("Converted: " + s);
+    }
     return s;
 };
 

@@ -26,6 +26,10 @@ html, body, td, div, tr, table {
     margin:0;
 }
 
+ref {
+    display: none;
+}
+
 #gutter {
     border-right: 1px solid black;
     height: 100%;

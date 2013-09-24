@@ -219,12 +219,13 @@ model.Event = function(timespan, description, opt_format, opt_section, opt_fetch
     }
     
     if (this.start == this.end) {
-        var words = description.match(/\[\[.*\]\]/g);
+        var words = description.match(/\[\[.*?\]\]/g);
         if (words) {
             var images = [];
             for (var i = 0; i < words.length; i++) {
                 var word = words[i].substr(2, words[i].length - 4).toLowerCase();
                 var image = data.IMAGES[word];
+                window.console.log("found image for " + word + ": " + (image != null));
                 if (image) {
                     images.push(image);
                     break;
